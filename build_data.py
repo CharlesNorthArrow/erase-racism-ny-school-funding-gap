@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""
+Reads the full Funding Gap CSV and outputs a trimmed data.js file
+containing only the columns needed by the interactive website.
+
+Usage: python3 build_data.py
+Output: data.js in the same directory as this script
+"""
+
+import csv
+import json
+import os
+import re
+
+CSV_PATH = os.path.expanduser(
+    "~/Downloads/Funding Gap Research Dataset - All Data.csv"
+)
+OUT_PATH = os.path.join(os.path.dirname(__file__), "data.js")
+
+# Map short friendly keys to the raw CSV column names
+COLUMNS = {
+    "enrollment":   "J(PC0257) 00 2024-25 PUBLIC ENROLLMENT EST.",
+    "quartile":     "Rank_Quartiles_Gap_PP",
+    "gap_total":    "CALC_Gap_Total",
+    "gap_pct":      "CALC_Gap_Pct_of_Current_FA",
+    "pct_poc":      "Per_POC_Students",
+    "pct_ecdis":    "PER_ECDIS",
+    "pct_prof":     "PER_PROF",
+    "county":       "County",
+    "district":     "ENTITY_NAME",
+    "cwr":          "I(WM0182) 05 COMBINED WEALTH RATIO (CWR) FOR 25-26 AID",
+    "current_fa":   "W(FA0001) 00 TOTAL FOUNDATION AID",
+}
+# gap_pp is derived: CALC_Gap_Total / J(PC0257) enrollment (per user spec)
+
+def clean_num(val):
+    """Strip $ signs and commas, return float or None."""
+    if val is None:
+        return None
+    v = str(val).strip().replace("$", "").replace(",", "").replace("%", "")
+    if v in ("", "N/A", "n/a", "NULL", "null", "s", ".", "-"):
+        return None
+    try:
+        return float(v)
+    except ValueError:
+        return None
+
+def clean_str(val):
+    s = str(val).strip() if val else ""
+    return s if s not in ("", "N/A") else None
+
+# Abbreviations to preserve as-is after title-casing
+_ABBREVS = {"Ufsd", "Csd", "Sd", "Usd", "Nyc", "Boces", "Ii", "Iii", "Iv"}
+_KEEP_UPPER = {"NYC"}
+def title_district(name):
+    """Title-case a district name, preserving common abbreviations."""
+    if not name:
+        return name
+    words = name.split()
+    result = []
+    for w in words:
+        upper = w.upper()
+        if upper in _KEEP_UPPER:
+            result.append(upper)
+        elif w.title() in _ABBREVS:
+            result.append(w.upper())
+        else:
+            result.append(w.title())
+    return " ".join(result)
+
+def normalize_county(raw):
+    if not raw:
+        return None
+    c = str(raw).strip().upper()
+    if c == "NYC ALL COUNTIES":
+        return "New York City"
+    if c == "SAINT LAWRENCE":
+        return "St. Lawrence"
+    # Title-case everything else
+    return raw.strip().title()
+
+records = []
+with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        # Skip rows with null CALC_ gap (7 districts with zero enrollment / missing FA)
+        gap_total_raw = row.get(COLUMNS["gap_total"], "")
+        if not gap_total_raw or gap_total_raw.strip() in ("", "N/A", "NULL"):
+            continue
+
+        gap_total = clean_num(row.get(COLUMNS["gap_total"]))
+        if gap_total is None:
+            continue
+
+        # gap_pp = CALC_Gap_Total / J(PC0257) public enrollment
+        enrollment_for_pp = clean_num(row.get(COLUMNS["enrollment"]))
+        gap_pp = (gap_total / enrollment_for_pp) if (enrollment_for_pp and enrollment_for_pp > 0) else None
+
+        # gap_pct is stored as a ratio (e.g. 4.71 = 471%) — convert to percentage
+        gap_pct_raw = clean_num(row.get(COLUMNS["gap_pct"]))
+        gap_pct = round(gap_pct_raw * 100, 2) if gap_pct_raw is not None else None
+
+        enrollment = clean_num(row.get(COLUMNS["enrollment"]))
+        pct_poc    = clean_num(row.get(COLUMNS["pct_poc"]))
+        # pct_poc is a decimal (0.865 = 86.5%)
+        if pct_poc is not None:
+            pct_poc = round(pct_poc * 100, 1)
+
+        pct_ecdis  = clean_num(row.get(COLUMNS["pct_ecdis"]))
+        pct_prof   = clean_num(row.get(COLUMNS["pct_prof"]))
+        cwr        = clean_num(row.get(COLUMNS["cwr"]))
+        current_fa = clean_num(row.get(COLUMNS["current_fa"]))
+
+        district = title_district(clean_str(row.get(COLUMNS["district"])))
+        county   = normalize_county(row.get(COLUMNS["county"]))
+        quartile = clean_str(row.get(COLUMNS["quartile"]))  # "Q1" .. "Q4"
+
+        records.append({
+            "district":   district,
+            "county":     county,
+            "quartile":   quartile,
+            "enrollment": int(enrollment) if enrollment is not None else None,
+            "gap_total":  round(gap_total, 2) if gap_total is not None else None,
+            "gap_pp":     round(gap_pp, 2)    if gap_pp    is not None else None,
+            "gap_pct":    gap_pct,
+            "pct_poc":    pct_poc,
+            "pct_ecdis":  pct_ecdis,
+            "pct_prof":   pct_prof,
+            "cwr":        round(cwr, 3)        if cwr       is not None else None,
+            "current_fa": round(current_fa, 2) if current_fa is not None else None,
+        })
+
+print(f"Processed {len(records)} districts")
+
+# Sort: NYC first, then alpha by district
+records.sort(key=lambda r: (r["district"] or ""))
+
+js = "// Auto-generated by build_data.py — do not edit manually\n"
+js += "const DISTRICT_DATA = " + json.dumps(records, indent=2) + ";\n"
+
+with open(OUT_PATH, "w", encoding="utf-8") as f:
+    f.write(js)
+
+print(f"Wrote {OUT_PATH} ({os.path.getsize(OUT_PATH) // 1024} KB)")
