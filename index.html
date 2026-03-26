@@ -4,6 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>New York School Funding Gap | ERASE Racism</title>
+
+  <!-- SEO & Social -->
+  <meta name="description" content="An interactive analysis of New York State's $77 billion school funding gap — explore funding inequities by district, county, and quartile, with a deep dive into Long Island." />
+  <meta name="author" content="ERASE Racism" />
+  <meta name="keywords" content="school funding gap, New York, Foundation Aid, ERASE Racism, education equity, racial equity, Long Island schools" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="New York's $77 Billion School Funding Gap | ERASE Racism" />
+  <meta property="og:description" content="Explore how New York State's Foundation Aid formula fails the students who need it most — an interactive data visualization by ERASE Racism." />
+  <meta property="og:image" content="logo.png" />
+  <meta property="og:site_name" content="ERASE Racism" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="New York's $77 Billion School Funding Gap | ERASE Racism" />
+  <meta name="twitter:description" content="Explore how New York State's Foundation Aid formula fails the students who need it most — an interactive data visualization by ERASE Racism." />
+  <meta name="twitter:image" content="logo.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="favicon.ico" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
@@ -68,10 +91,14 @@
     }
     .header-brand {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
     }
-    .header-brand .org { font-family: var(--font-serif); font-size: 13px; color: var(--purple-light); letter-spacing: .05em; text-transform: uppercase; }
-    .header-brand .title { font-family: var(--font-serif); font-size: 18px; color: var(--white); font-weight: 700; line-height: 1.2; }
+    .header-logo { height: 44px; width: auto; display: block; filter: brightness(0) invert(1); }
+    .header-brand-text { display: flex; flex-direction: column; }
+    .header-brand-text .org { font-family: var(--font-serif); font-size: 12px; color: var(--purple-light); letter-spacing: .05em; text-transform: uppercase; }
+    .header-brand-text .title { font-family: var(--font-serif); font-size: 17px; color: var(--white); font-weight: 700; line-height: 1.2; }
     nav { display: flex; gap: 6px; flex-wrap: wrap; }
     nav a {
       color: var(--purple-light);
@@ -378,6 +405,81 @@
     footer a { color: var(--purple-light); }
     .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 
+    /* ── Download button ──────────────────────────── */
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--purple-dark);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s;
+      margin-top: 28px;
+    }
+    .download-btn:hover { background: var(--purple-darker); color: var(--white); }
+    .download-btn svg { flex-shrink: 0; }
+
+    /* ── Quartile collapsible district list ───────── */
+    .q-details {
+      margin-top: 14px;
+      border-top: 1px solid var(--gray-light);
+      padding-top: 10px;
+    }
+    .q-card.q4 .q-details { border-color: rgba(255,255,255,.2); }
+    .q-details summary {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--gray-mid);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+      padding: 2px 0;
+    }
+    .q-card.q4 .q-details summary { color: rgba(255,255,255,.6); }
+    .q-details summary::-webkit-details-marker { display: none; }
+    .q-details summary::before {
+      content: '▶';
+      font-size: 9px;
+      transition: transform .15s;
+      display: inline-block;
+    }
+    .q-details[open] summary::before { transform: rotate(90deg); }
+    .q-district-list {
+      margin-top: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--brown-text);
+      padding-right: 4px;
+    }
+    .q-card.q4 .q-district-list { color: rgba(255,255,255,.85); }
+    .q-district-list::-webkit-scrollbar { width: 4px; }
+    .q-district-list::-webkit-scrollbar-track { background: transparent; }
+    .q-district-list::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 2px; }
+    .q-district-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 1px 0;
+      border-bottom: 1px solid transparent;
+    }
+    .q-district-item:hover { border-bottom-color: var(--gray-light); }
+    .q-district-item .d-name { flex: 1; }
+    .q-district-item .d-gap { font-variant-numeric: tabular-nums; white-space: nowrap; opacity: .75; }
+
     /* ── Utilities ────────────────────────────────── */
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
     .empty-msg { color: var(--gray-mid); font-style: italic; padding: 24px 0; }
@@ -396,10 +498,13 @@
 <!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
 <header>
   <div class="header-inner">
-    <div class="header-brand">
-      <span class="org">ERASE Racism</span>
-      <span class="title">New York School Funding Gap</span>
-    </div>
+    <a class="header-brand" href="https://www.eraseracismny.org/" target="_blank" rel="noopener" aria-label="ERASE Racism — New York School Funding Gap">
+      <img src="logo.png" alt="ERASE Racism logo" class="header-logo" />
+      <div class="header-brand-text">
+        <span class="org">ERASE Racism</span>
+        <span class="title">New York School Funding Gap</span>
+      </div>
+    </a>
     <nav aria-label="Page sections">
       <a href="#lookup">District Lookup</a>
       <a href="#map-section">County Map</a>
@@ -458,6 +563,11 @@
       <div class="stats-grid" id="stats-grid"></div>
     </div>
     <p class="empty-msg" id="lookup-empty">Select a district or county above to view statistics.</p>
+
+    <button class="download-btn" onclick="downloadCSV()" aria-label="Download full district data as CSV">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.5 10.5L3.5 6.5H6V1.5H9V6.5H11.5L7.5 10.5Z" fill="white"/><path d="M2 12.5H13V13.5H2V12.5Z" fill="white"/></svg>
+      Download District Data (CSV)
+    </button>
   </div>
 </section>
 
@@ -530,7 +640,7 @@
         <p>New York State Education Department (NYSED) — Foundation Aid, demographics, ELA assessment results, 2024–25</p>
         <p>U.S. Census Bureau — SAIPE poverty estimates, 2024</p>
         <p>National Center for Education Statistics (NCES) — Comparable Wage Index for Teachers (CWIFT), 2022</p>
-        <p style="margin-top:10px; font-size:13px; opacity:.65;">Analysis: ERASE Racism, March 2026 · Visualization: North Arrow</p>
+        <p style="margin-top:10px; font-size:13px; opacity:.75;">Analysis: ERASE Racism, March 2026 · Visualization by <a href="https://www.north-arrow.org/" target="_blank" rel="noopener" style="color:var(--purple-light)">North Arrow ↗</a></p>
       </div>
     </div>
   </div>
@@ -861,6 +971,58 @@ function drawMap() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   CSV DOWNLOAD
+───────────────────────────────────────────────────────────────────────── */
+function downloadCSV() {
+  const headers = [
+    'District Name',
+    'County',
+    'Enrollment',
+    'Total Funding Gap ($)',
+    'Per-Pupil Funding Gap ($)',
+    'Gap as % of Current Foundation Aid',
+    '% Students of Color',
+    '% Economically Disadvantaged',
+    '% Proficient ELA Gr 3-8',
+    'Combined Wealth Ratio',
+    'Quartile (Per-Pupil Gap)',
+  ];
+
+  const esc = v => {
+    if (v == null) return '';
+    const s = String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+
+  const rows = [headers.join(',')];
+  for (const r of RECORDS) {
+    rows.push([
+      esc(r.district),
+      esc(r.county),
+      esc(r.enrollment),
+      esc(r.gap_total != null ? Math.round(r.gap_total) : null),
+      esc(r.gap_pp    != null ? Math.round(r.gap_pp)    : null),
+      esc(r.gap_pct   != null ? r.gap_pct.toFixed(2) + '%' : null),
+      esc(r.pct_poc   != null ? r.pct_poc.toFixed(1) + '%' : null),
+      esc(r.pct_ecdis != null ? r.pct_ecdis.toFixed(1) + '%' : null),
+      esc(r.pct_prof  != null ? r.pct_prof + '%' : null),
+      esc(r.cwr       != null ? r.cwr.toFixed(3) : null),
+      esc(r.quartile),
+    ].join(','));
+  }
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ERASE-Racism-NY-School-Funding-Gap.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    FEATURE 3: QUARTILE CARDS
 ───────────────────────────────────────────────────────────────────────── */
 function renderQuartileCards() {
@@ -924,10 +1086,27 @@ function renderQuartileCards() {
         <div class="q-metric-value">${fmt.ratio(data.cwr)}</div>
       </div>`;
 
+    // Build collapsible district list for this quartile
+    const qDistricts = RECORDS
+      .filter(r => r.quartile === q)
+      .sort((a, b) => (b.gap_pp || 0) - (a.gap_pp || 0));
+
+    const districtRows = qDistricts.map(r => `
+      <div class="q-district-item">
+        <span class="d-name">${r.district}</span>
+        <span class="d-gap">${r.gap_pp != null ? fmt.dollar(r.gap_pp) : 'N/A'}</span>
+      </div>`).join('');
+
+    const detailsHTML = `
+      <details class="q-details">
+        <summary>${qDistricts.length} districts — click to expand</summary>
+        <div class="q-district-list">${districtRows}</div>
+      </details>`;
+
     const card = document.createElement('div');
     card.className = `q-card ${cls}`;
     card.setAttribute('role', 'listitem');
-    card.innerHTML = html;
+    card.innerHTML = html + detailsHTML;
     container.appendChild(card);
   }
 }
