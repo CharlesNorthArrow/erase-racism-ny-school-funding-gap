@@ -480,6 +480,88 @@
     .q-district-item .d-name { flex: 1; }
     .q-district-item .d-gap { font-variant-numeric: tabular-nums; white-space: nowrap; opacity: .75; }
 
+    /* ── Quartile badge (in lookup) ───────────────── */
+    .quartile-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .03em;
+    }
+    .quartile-badge.q1 { background: #f0f0f0; color: var(--brown-text); }
+    .quartile-badge.q2 { background: #f7eefb; color: var(--purple-dark); border: 1px solid #dbb6ea; }
+    .quartile-badge.q3 { background: #ead6f5; color: var(--purple-darker); border: 1px solid var(--purple-accent); }
+    .quartile-badge.q4 { background: var(--purple-darker); color: var(--white); }
+    .stat-card.quartile-card { grid-column: 1 / -1; }
+
+    /* ── Download section ─────────────────────────── */
+    #download-section { padding: 48px 0; background: var(--bg-light); }
+    .download-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
+    .download-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--white);
+      color: var(--purple-dark);
+      border: 2px solid var(--purple-dark);
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .download-btn-secondary:hover { background: var(--purple-dark); color: var(--white); }
+    .download-btn-secondary svg { flex-shrink: 0; }
+
+    /* ── LI chart legend + search ─────────────────── */
+    .li-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--brown-text);
+    }
+    .li-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .li-legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .li-legend-swatch.hollow {
+      background: none;
+      border: 2px solid var(--purple-dark);
+    }
+    .li-search-wrap {
+      margin-bottom: 10px;
+    }
+    #li-search {
+      padding: 7px 12px;
+      border: 1px solid var(--gray-light);
+      border-radius: 6px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--brown-text);
+      width: 260px;
+      max-width: 100%;
+      outline: none;
+    }
+    #li-search:focus { border-color: var(--purple-accent); }
+
+    /* ── LI Q4 comparison chart ───────────────────── */
+    #li-q4-section { margin-top: 48px; }
+    #li-q4-chart { width: 100%; display: block; }
+
     /* ── Utilities ────────────────────────────────── */
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
     .empty-msg { color: var(--gray-mid); font-style: italic; padding: 24px 0; }
@@ -510,6 +592,7 @@
       <a href="#map-section">County Map</a>
       <a href="#quartile-section">Quartile Analysis</a>
       <a href="#li-section">Long Island</a>
+      <a href="long-island.html" style="border-color:rgba(255,255,255,.4)">Long Island Deep Dive ↗</a>
     </nav>
   </div>
 </header>
@@ -563,11 +646,24 @@
       <div class="stats-grid" id="stats-grid"></div>
     </div>
     <p class="empty-msg" id="lookup-empty">Select a district or county above to view statistics.</p>
+  </div>
+</section>
 
-    <button class="download-btn" onclick="downloadCSV()" aria-label="Download full district data as CSV">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.5 10.5L3.5 6.5H6V1.5H9V6.5H11.5L7.5 10.5Z" fill="white"/><path d="M2 12.5H13V13.5H2V12.5Z" fill="white"/></svg>
-      Download District Data (CSV)
-    </button>
+<!-- ══ DOWNLOAD DATA ════════════════════════════════════════════════════════ -->
+<section id="download-section" aria-labelledby="download-title">
+  <div class="container">
+    <h2 class="section-title" id="download-title">Download the Data</h2>
+    <p class="section-sub">Download school district or county-level data as a CSV file for your own analysis.</p>
+    <div class="download-row">
+      <button class="download-btn" onclick="downloadCSV()" aria-label="Download full district data as CSV">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.5 10.5L3.5 6.5H6V1.5H9V6.5H11.5L7.5 10.5Z" fill="white"/><path d="M2 12.5H13V13.5H2V12.5Z" fill="white"/></svg>
+        Download District Data (CSV)
+      </button>
+      <button class="download-btn-secondary" onclick="downloadCountyCSV()" aria-label="Download county-level data as CSV">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.5 10.5L3.5 6.5H6V1.5H9V6.5H11.5L7.5 10.5Z" fill="currentColor"/><path d="M2 12.5H13V13.5H2V12.5Z" fill="currentColor"/></svg>
+        Download County Data (CSV)
+      </button>
+    </div>
   </div>
 </section>
 
@@ -618,11 +714,40 @@
       <button id="li-toggle-pct" onclick="setLIMetric('pct')">% of Revenue</button>
     </div>
 
+    <div class="li-legend" id="li-legend">
+      <div class="li-legend-item">
+        <div class="li-legend-swatch" style="background:#6B2680"></div>
+        <span>Nassau County — underfunded</span>
+      </div>
+      <div class="li-legend-item">
+        <div class="li-legend-swatch" style="background:#AE43CE"></div>
+        <span>Suffolk County — underfunded</span>
+      </div>
+      <div class="li-legend-item">
+        <div class="li-legend-swatch hollow" style="border-color:#6B2680"></div>
+        <span>Nassau County — receiving more than updated formula</span>
+      </div>
+      <div class="li-legend-item">
+        <div class="li-legend-swatch hollow" style="border-color:#AE43CE"></div>
+        <span>Suffolk County — receiving more than updated formula</span>
+      </div>
+    </div>
+
+    <div class="li-search-wrap">
+      <input type="text" id="li-search" placeholder="Search for a district to highlight…" oninput="liChartSearch(this.value)" aria-label="Search Long Island districts">
+    </div>
+
     <div id="li-chart-container">
       <svg id="li-chart" role="img" aria-label="Diverging bar chart of Long Island school district funding gaps"></svg>
     </div>
 
     <div class="li-callout" id="li-callout"></div>
+
+    <div id="li-q4-section">
+      <h3 style="font-family:var(--font-serif);font-size:22px;color:var(--purple-dark);margin-bottom:8px;margin-top:0">Q4 Long Island Districts: High Need, Highest Gap</h3>
+      <p style="font-size:15px;color:var(--gray-mid);margin-bottom:20px;max-width:680px">How Q4 Long Island districts — those with the largest per-pupil funding gaps — compare to the Long Island average across key demographic and need indicators.</p>
+      <svg id="li-q4-chart" role="img" aria-label="Comparison of Q4 Long Island districts vs Long Island average on key metrics"></svg>
+    </div>
   </div>
 </section>
 
@@ -687,6 +812,8 @@ function buildCountyData(records) {
     };
     const totalGap = recs.reduce((s,r) => s + (r.gap_total||0), 0);
     const totalFA  = recs.reduce((s,r) => s + (r.current_fa||0), 0);
+    const quartileCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
+    for (const r of recs) { if (r.quartile && quartileCounts[r.quartile] != null) quartileCounts[r.quartile]++; }
     out[county] = {
       county,
       district: county,
@@ -701,6 +828,7 @@ function buildCountyData(records) {
       pct_prof:  wAvg('pct_prof'),
       cwr:       avg('cwr'),
       current_fa: totalFA,
+      quartile_counts: quartileCounts,
     };
   }
   return out;
@@ -818,11 +946,14 @@ function populateSelect() {
   }
 }
 
+const QUARTILE_LABELS = { Q1: 'Smallest Gap', Q2: 'Moderate Gap', Q3: 'Large Gap', Q4: 'Largest Gap' };
+
 function renderLookup() {
   const sel = document.getElementById('lookup-select').value;
   if (!sel) {
     document.getElementById('stats-panel').classList.remove('visible');
     document.getElementById('lookup-empty').style.display = '';
+    history.replaceState(null, '', window.location.pathname);
     return;
   }
   document.getElementById('lookup-empty').style.display = 'none';
@@ -833,9 +964,15 @@ function renderLookup() {
 
   if (!d) return;
 
+  // Update URL hash
+  const hashVal = lookupMode === 'district'
+    ? 'district=' + encodeURIComponent(sel)
+    : 'county=' + encodeURIComponent(sel);
+  history.replaceState(null, '', '#' + hashVal);
+
   document.getElementById('stats-name').textContent = d.district || d.county || sel;
   const meta = lookupMode === 'district'
-    ? `${d.county} County · ${fmt.num(d.enrollment)} students · Quartile ${d.quartile||'N/A'}`
+    ? `${d.county} County · ${fmt.num(d.enrollment)} students`
     : `${d.num_districts} districts · ${fmt.num(d.enrollment)} students`;
   document.getElementById('stats-meta').textContent = meta;
 
@@ -852,6 +989,30 @@ function renderLookup() {
 
   const grid = document.getElementById('stats-grid');
   grid.innerHTML = '';
+
+  // Quartile card — district mode shows badge, county mode shows distribution
+  if (lookupMode === 'district' && d.quartile) {
+    const qCard = document.createElement('div');
+    qCard.className = 'stat-card quartile-card';
+    const qLabel = QUARTILE_LABELS[d.quartile] || '';
+    qCard.innerHTML = `<div class="stat-label">Quartile Ranking (Per-Pupil Gap)</div>
+      <div style="margin-top:8px"><span class="quartile-badge ${d.quartile.toLowerCase()}">${d.quartile} — ${qLabel}</span></div>
+      <div class="stat-compare" style="margin-top:8px">Districts are ranked Q1 (smallest gap) to Q4 (largest gap) by per-pupil funding gap.</div>`;
+    grid.appendChild(qCard);
+  } else if (lookupMode === 'county' && d.quartile_counts) {
+    const qc = d.quartile_counts;
+    const qCard = document.createElement('div');
+    qCard.className = 'stat-card quartile-card';
+    qCard.innerHTML = `<div class="stat-label">Quartile Distribution</div>
+      <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+        ${['Q4','Q3','Q2','Q1'].map(q => qc[q] > 0
+          ? `<span class="quartile-badge ${q.toLowerCase()}">${q}: ${qc[q]} district${qc[q]!==1?'s':''}</span>`
+          : '').join('')}
+      </div>
+      <div class="stat-compare" style="margin-top:8px">Number of districts in each funding gap quartile.</div>`;
+    grid.appendChild(qCard);
+  }
+
   for (const m of metrics) {
     const val = d[m.field];
     const stateVal = STATE_AVG[m.field];
@@ -940,7 +1101,9 @@ function drawMap() {
       const valStr = mapMetric === 'pp' ? fmt.dollar(val) : fmt.pct(val);
       const label = mapMetric === 'pp' ? 'Per-Pupil Gap' : 'Gap as % of Revenue';
       const tip = document.getElementById('map-tooltip');
-      tip.innerHTML = `<strong>${cn}</strong>${label}: ${valStr}<br>${fmt.num(cd.enrollment)} students`;
+      const qc = cd.quartile_counts || {};
+      const qParts = ['Q4','Q3','Q2','Q1'].filter(q => qc[q] > 0).map(q => `${q}: ${qc[q]}`).join(' · ');
+      tip.innerHTML = `<strong>${cn}</strong>${label}: ${valStr}<br>${fmt.num(cd.enrollment)} students<br><span style="font-size:12px;opacity:.85">${qParts}</span>`;
       tip.style.opacity = '1';
       tip.style.left = (event.clientX + 14) + 'px';
       tip.style.top  = (event.clientY - 10) + 'px';
@@ -1016,6 +1179,63 @@ function downloadCSV() {
   const a = document.createElement('a');
   a.href = url;
   a.download = 'ERASE-Racism-NY-School-Funding-Gap.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadCountyCSV() {
+  const headers = [
+    'County',
+    'Total Districts',
+    'Total Enrollment',
+    'Total Funding Gap ($)',
+    'Per-Pupil Gap ($)',
+    'Gap as % of Current Foundation Aid',
+    '% Students of Color (weighted)',
+    '% Economically Disadvantaged (weighted)',
+    '% Proficient ELA Gr 3-8 (weighted)',
+    'Combined Wealth Ratio (weighted)',
+    'Q1 Districts',
+    'Q2 Districts',
+    'Q3 Districts',
+    'Q4 Districts',
+  ];
+
+  const esc = v => {
+    if (v == null) return '';
+    const s = String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+
+  const rows = [headers.join(',')];
+  const sorted = Object.values(COUNTY_DATA).sort((a,b) => (a.county||'').localeCompare(b.county||''));
+  for (const c of sorted) {
+    const qc = c.quartile_counts || {};
+    rows.push([
+      esc(c.county),
+      esc(c.num_districts),
+      esc(c.enrollment),
+      esc(c.gap_total != null ? Math.round(c.gap_total) : null),
+      esc(c.gap_pp    != null ? Math.round(c.gap_pp)    : null),
+      esc(c.gap_pct   != null ? c.gap_pct.toFixed(2) + '%' : null),
+      esc(c.pct_poc   != null ? c.pct_poc.toFixed(1) + '%' : null),
+      esc(c.pct_ecdis != null ? c.pct_ecdis.toFixed(1) + '%' : null),
+      esc(c.pct_prof  != null ? c.pct_prof.toFixed(1) + '%' : null),
+      esc(c.cwr       != null ? c.cwr.toFixed(3) : null),
+      esc(qc.Q1 || 0),
+      esc(qc.Q2 || 0),
+      esc(qc.Q3 || 0),
+      esc(qc.Q4 || 0),
+    ].join(','));
+  }
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ERASE-Racism-NY-County-Funding-Gap.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1144,6 +1364,20 @@ function renderLIIntro() {
   }
 }
 
+function liChartSearch(query) {
+  const q = query.trim().toLowerCase();
+  const svgEl = document.getElementById('li-chart');
+  const groups = svgEl.querySelectorAll('g[data-district]');
+  if (!q) {
+    groups.forEach(g => g.setAttribute('opacity', 1));
+    return;
+  }
+  groups.forEach(g => {
+    const name = g.getAttribute('data-district') || '';
+    g.setAttribute('opacity', name.includes(q) ? 1 : 0.1);
+  });
+}
+
 function drawLIChart() {
   const liDistricts = RECORDS
     .filter(r => r.county === 'Nassau' || r.county === 'Suffolk')
@@ -1153,33 +1387,40 @@ function drawLIChart() {
   const vals = liDistricts.map(d => d[field] || 0);
   const maxAbs = Math.max(Math.abs(d3.min(vals)), Math.abs(d3.max(vals)));
 
-  const marginLeft = 180;
+  const marginLeft = 185;
   const marginRight = 20;
-  const marginTop = 24;
-  const marginBottom = 36;
+  const marginTop = 62;   // extra space for direction labels + tick labels at top
+  const marginBottom = 10;
   const rowH = 14;
   const H = liDistricts.length * rowH + marginTop + marginBottom;
   const W = Math.max(700, 900);
   const chartW = W - marginLeft - marginRight;
-  const midX = marginLeft + chartW / 2;
 
   const svg = d3.select('#li-chart')
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('height', H);
-
   svg.selectAll('*').remove();
 
-  // Color: purple for positive gap, gray for negative
   const PURPLE = '#6B2680';
-  const GRAY   = '#949494';
   const LIGHT_PURPLE = '#AE43CE';
 
-  // Scale: 0 = center, maxAbs = edge
   const xScale = d3.scaleLinear()
     .domain([-maxAbs, maxAbs])
     .range([marginLeft, W - marginRight]);
 
-  // Axis
+  // Direction labels at top (bigger, moved from bottom)
+  svg.append('text')
+    .attr('x', xScale(-maxAbs * 0.5)).attr('y', 16)
+    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', '#666')
+    .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
+    .text('← Currently receiving more than updated formula');
+  svg.append('text')
+    .attr('x', xScale(maxAbs * 0.5)).attr('y', 16)
+    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', PURPLE)
+    .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
+    .text('Underfunded relative to updated formula →');
+
+  // Tick gridlines + labels
   const tickCount = 5;
   const ticks = d3.range(-maxAbs, maxAbs * 1.01, maxAbs * 2 / tickCount);
   const g = svg.append('g').attr('class', 'axis');
@@ -1194,7 +1435,9 @@ function drawLIChart() {
       .attr('text-anchor', 'middle')
       .attr('font-size', 11).attr('fill', '#949494')
       .attr('font-family', "'Source Sans 3', sans-serif")
-      .text(liMetric === 'pp' ? (t === 0 ? '$0' : (t > 0 ? '+' : '') + '$' + Math.abs(Math.round(t/1000)) + 'K') : (t === 0 ? '0%' : (t > 0 ? '+' : '') + Math.abs(Math.round(t)) + '%'));
+      .text(liMetric === 'pp'
+        ? (t === 0 ? '$0' : (t > 0 ? '+' : '') + '$' + Math.abs(Math.round(t/1000)) + 'K')
+        : (t === 0 ? '0%' : (t > 0 ? '+' : '') + Math.abs(Math.round(t)) + '%'));
   }
 
   // Zero line
@@ -1203,9 +1446,8 @@ function drawLIChart() {
     .attr('x2', xScale(0)).attr('y2', H - marginBottom)
     .attr('stroke', '#3D3630').attr('stroke-width', 1.5);
 
-  // Bars
+  // Bars — one <g> per district for easy search highlighting
   const barsG = svg.append('g');
-  const LABEL_THRESHOLD = 15; // label top N and bottom N by index
 
   liDistricts.forEach((d, i) => {
     const val = d[field] || 0;
@@ -1215,62 +1457,39 @@ function drawLIChart() {
     const barW = Math.abs(x1 - x0);
     const barX = val >= 0 ? x0 : x0 - barW;
     const isPositive = val >= 0;
-    const color = isPositive ? (d.county === 'Nassau' ? PURPLE : LIGHT_PURPLE) : GRAY;
+    const countyColor = d.county === 'Nassau' ? PURPLE : LIGHT_PURPLE;
 
-    barsG.append('rect')
+    const distG = barsG.append('g')
+      .attr('data-district', d.district.toLowerCase());
+
+    // Bar rect — filled for positive gap, hollow (border only) for negative
+    const barRect = distG.append('rect')
       .attr('x', barX).attr('y', y + 1)
-      .attr('width', Math.max(barW, 1)).attr('height', rowH - 2)
-      .attr('fill', color).attr('opacity', 0.85)
+      .attr('width', Math.max(barW, 2)).attr('height', rowH - 2)
       .attr('rx', 1);
-
-    // District name labels on both ends
-    const showLabel = i < LABEL_THRESHOLD || i >= liDistricts.length - LABEL_THRESHOLD;
-    if (showLabel) {
-      const labelX = isPositive ? Math.min(x1 + 3, W - marginRight - 4) : Math.max(barX - 3, marginLeft + 2);
-      const anchor = isPositive ? 'start' : 'end';
-      barsG.append('text')
-        .attr('x', labelX).attr('y', y + rowH - 3)
-        .attr('text-anchor', anchor)
-        .attr('font-size', 10).attr('fill', '#3D3630')
-        .attr('font-family', "'Source Sans 3', sans-serif")
-        .text(d.district.replace(' UNION FREE SD','').replace(' CENTRAL SD','').replace(' CITY SD','').replace(' UFSD','').replace(' CSD',''));
+    if (isPositive) {
+      barRect.attr('fill', countyColor).attr('opacity', 0.85);
+    } else {
+      barRect.attr('fill', 'none')
+        .attr('stroke', countyColor).attr('stroke-width', 1.5).attr('opacity', 0.9);
     }
 
-    // County label (left margin)
-    barsG.append('text')
+    // District name in left margin for every bar
+    const shortName = d.district
+      .replace(/ UNION FREE SD$/i, '').replace(/ CENTRAL SD$/i, '')
+      .replace(/ CITY SD$/i, '').replace(/ UFSD$/i, '').replace(/ CSD$/i, '');
+    distG.append('text')
       .attr('x', marginLeft - 4).attr('y', y + rowH - 3)
       .attr('text-anchor', 'end')
-      .attr('font-size', 10)
-      .attr('fill', d.county === 'Nassau' ? PURPLE : LIGHT_PURPLE)
+      .attr('font-size', 9.5).attr('fill', countyColor)
       .attr('font-family', "'Source Sans 3', sans-serif")
-      .text(d.county.slice(0,3).toUpperCase());
-  });
+      .text(shortName);
 
-  // Axis labels
-  svg.append('text')
-    .attr('x', xScale(-maxAbs * 0.5)).attr('y', H - 6)
-    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', GRAY)
-    .attr('font-family', "'Source Sans 3', sans-serif")
-    .text('← Receiving more than formula (Save Harmless)');
-  svg.append('text')
-    .attr('x', xScale(maxAbs * 0.5)).attr('y', H - 6)
-    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', PURPLE)
-    .attr('font-family', "'Source Sans 3', sans-serif")
-    .text('Underfunded relative to updated formula →');
-
-  // Tooltip
-  barsG.selectAll('rect').on('mousemove', function(event) {
-    // Find which district this is by position
-  }).on('click', null);
-
-  // Add interactivity per district
-  liDistricts.forEach((d, i) => {
-    const y = marginTop + i * rowH;
-    barsG.append('rect')
-      .attr('x', marginLeft).attr('y', y)
-      .attr('width', chartW).attr('height', rowH)
+    // Transparent hover overlay for tooltip
+    distG.append('rect')
+      .attr('x', 0).attr('y', y)
+      .attr('width', W).attr('height', rowH)
       .attr('fill', 'transparent')
-      .attr('class', 'hover-target')
       .on('mousemove', function(event) {
         const val = d[field];
         const valStr = liMetric === 'pp' ? fmt.dollar(val) : fmt.pct(val);
@@ -1284,6 +1503,10 @@ function drawLIChart() {
         document.getElementById('map-tooltip').style.opacity = '0';
       });
   });
+
+  // Re-apply any active search highlight after redraw
+  const searchEl = document.getElementById('li-search');
+  if (searchEl && searchEl.value.trim()) liChartSearch(searchEl.value);
 }
 
 function renderLICallout() {
@@ -1329,8 +1552,140 @@ function renderLICallout() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+   FEATURE 4b: LI Q4 DEMOGRAPHICS COMPARISON CHART
+───────────────────────────────────────────────────────────────────────── */
+function drawLIQ4Chart() {
+  const liAll = RECORDS.filter(r => r.county === 'Nassau' || r.county === 'Suffolk');
+  const liQ4  = liAll.filter(r => r.quartile === 'Q4');
+
+  // Enrollment-weighted pool for a field
+  const wPool = (recs, field) => {
+    const valid = recs.filter(r => r[field] != null && r.enrollment);
+    if (!valid.length) return null;
+    const sumW = valid.reduce((s, r) => s + r.enrollment, 0);
+    return valid.reduce((s, r) => s + r[field] * r.enrollment, 0) / sumW;
+  };
+  const gapPool = recs => {
+    const tot = recs.reduce((s, r) => s + (r.gap_total || 0), 0);
+    const enr = recs.reduce((s, r) => s + (r.enrollment || 0), 0);
+    return enr > 0 ? tot / enr : null;
+  };
+
+  const liAvg = {
+    pct_poc:   wPool(liAll, 'pct_poc'),
+    pct_ecdis: wPool(liAll, 'pct_ecdis'),
+    pct_prof:  wPool(liAll, 'pct_prof'),
+    cwr:       wPool(liAll, 'cwr'),
+    gap_pp:    gapPool(liAll),
+  };
+  const q4Avg = {
+    pct_poc:   wPool(liQ4, 'pct_poc'),
+    pct_ecdis: wPool(liQ4, 'pct_ecdis'),
+    pct_prof:  wPool(liQ4, 'pct_prof'),
+    cwr:       wPool(liQ4, 'cwr'),
+    gap_pp:    gapPool(liQ4),
+  };
+
+  const metrics = [
+    { key: 'pct_poc',   label: '% Students of Color',          fmt: v => v.toFixed(1) + '%' },
+    { key: 'pct_ecdis', label: '% Economically Disadvantaged',  fmt: v => v.toFixed(1) + '%' },
+    { key: 'pct_prof',  label: '% Proficient (ELA Gr 3–8)',     fmt: v => v.toFixed(1) + '%' },
+    { key: 'cwr',       label: 'Combined Wealth Ratio',         fmt: v => v.toFixed(2) + 'x' },
+    { key: 'gap_pp',    label: 'Per-Pupil Funding Gap',         fmt: v => '$' + Math.round(v).toLocaleString() },
+  ];
+
+  const W = 800;
+  const rowH = 72;
+  const mL = 210;  // left margin for labels
+  const mR = 20;
+  const mT = 44;   // top margin for legend
+  const mB = 10;
+  const H = metrics.length * rowH + mT + mB;
+  const PURPLE = '#6B2680';
+  const GRAY   = '#888';
+  const FONT   = "'Source Sans 3', sans-serif";
+
+  const svg = d3.select('#li-q4-chart')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('height', H);
+  svg.selectAll('*').remove();
+
+  // Legend
+  const legendY = 20;
+  svg.append('circle').attr('cx', mL + 10).attr('cy', legendY).attr('r', 7).attr('fill', GRAY);
+  svg.append('text').attr('x', mL + 22).attr('y', legendY + 4).attr('font-size', 12).attr('fill', GRAY).attr('font-family', FONT).text('Long Island Average');
+  svg.append('circle').attr('cx', mL + 165).attr('cy', legendY).attr('r', 7).attr('fill', PURPLE);
+  svg.append('text').attr('x', mL + 177).attr('y', legendY + 4).attr('font-size', 12).attr('fill', PURPLE).attr('font-family', FONT).text('Q4 Districts');
+
+  metrics.forEach((m, i) => {
+    const liVal = liAvg[m.key];
+    const q4Val = q4Avg[m.key];
+    if (liVal == null || q4Val == null) return;
+
+    const cy = mT + i * rowH + rowH / 2;
+
+    // Per-row scale from 0 to max * 1.12
+    const domMax = Math.max(liVal, q4Val) * 1.12;
+    const xSc = d3.scaleLinear().domain([0, domMax]).range([mL, W - mR]);
+    const xLi = xSc(liVal);
+    const xQ4 = xSc(q4Val);
+
+    // Connecting line
+    svg.append('line')
+      .attr('x1', Math.min(xLi, xQ4)).attr('y1', cy)
+      .attr('x2', Math.max(xLi, xQ4)).attr('y2', cy)
+      .attr('stroke', '#ddd').attr('stroke-width', 2);
+
+    // LI Avg dot + label
+    svg.append('circle').attr('cx', xLi).attr('cy', cy).attr('r', 8).attr('fill', GRAY);
+    svg.append('text')
+      .attr('x', xLi).attr('y', cy - 13)
+      .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', GRAY)
+      .attr('font-family', FONT).text(m.fmt(liVal));
+
+    // Q4 dot + label
+    svg.append('circle').attr('cx', xQ4).attr('cy', cy).attr('r', 8).attr('fill', PURPLE);
+    svg.append('text')
+      .attr('x', xQ4).attr('y', cy - 13)
+      .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', PURPLE)
+      .attr('font-family', FONT).text(m.fmt(q4Val));
+
+    // Row label
+    svg.append('text')
+      .attr('x', mL - 10).attr('y', cy + 4)
+      .attr('text-anchor', 'end').attr('font-size', 12).attr('fill', '#3D3630')
+      .attr('font-family', FONT).text(m.label);
+
+    // Subtle row separator
+    if (i < metrics.length - 1) {
+      svg.append('line')
+        .attr('x1', 0).attr('y1', mT + (i + 1) * rowH)
+        .attr('x2', W).attr('y2', mT + (i + 1) * rowH)
+        .attr('stroke', '#f0f0f0').attr('stroke-width', 1);
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
    INIT
 ───────────────────────────────────────────────────────────────────────── */
+function applyHashLookup() {
+  const hash = window.location.hash.slice(1); // remove leading #
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  const district = params.get('district');
+  const county   = params.get('county');
+  if (district) {
+    setLookupMode('district');
+    document.getElementById('lookup-select').value = district;
+    renderLookup();
+  } else if (county) {
+    setLookupMode('county');
+    document.getElementById('lookup-select').value = county;
+    renderLookup();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Hero stats — driven live from data so they stay consistent with lookup figures
   document.getElementById('hero-gap-total').textContent = fmt.dollarB(STATE_AVG.gap_total);
@@ -1343,6 +1698,13 @@ document.addEventListener('DOMContentLoaded', () => {
   renderLIIntro();
   drawLIChart();
   renderLICallout();
+  drawLIQ4Chart();
+
+  // Apply hash-based lookup selection on load
+  applyHashLookup();
+
+  // Update lookup when browser back/forward changes the hash
+  window.addEventListener('hashchange', applyHashLookup);
 });
 </script>
 </body>

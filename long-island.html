@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Long Island School Funding Gap — ERASE Racism</title>
+  <meta name="description" content="An interactive deep dive into Nassau and Suffolk county school funding inequities, from ERASE Racism's March 2026 analysis." />
+  <meta property="og:title" content="Long Island School Funding Gap — ERASE Racism" />
+  <meta property="og:description" content="Nassau and Suffolk counties are home to some of the most dramatic school funding inequities in New York State." />
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    /* ── Tokens ─────────────────────────────────── */
+    :root {
+      --purple-dark:   #6B2680;
+      --purple-accent: #AE43CE;
+      --purple-darker: #57146D;
+      --purple-light:  #D4A9E8;
+      --purple-faint:  #F5F1F6;
+      --brown-text:    #3D3630;
+      --gray-mid:      #949494;
+      --gray-light:    #E8E8E8;
+      --bg-light:      #F5F1F6;
+      --white:         #FFFFFF;
+      --font-serif:    'Merriweather', Georgia, serif;
+      --font-sans:     'Source Sans 3', 'Source Sans Pro', sans-serif;
+      --radius:        8px;
+      --shadow:        0 1px 4px rgba(0,0,0,.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); color: var(--brown-text); background: var(--white); line-height: 1.6; }
+    a { color: var(--purple-accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1, h2, h3, h4 { font-family: var(--font-serif); }
+    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 64px 0; }
+    .section-alt { background: var(--bg-light); }
+    .section-title { font-size: 28px; color: var(--purple-dark); margin-bottom: 10px; }
+    .section-sub { font-size: 16px; color: var(--gray-mid); max-width: 720px; margin-bottom: 32px; line-height: 1.6; }
+
+    /* ── Header ─────────────────────────────────── */
+    header {
+      background: var(--purple-darker);
+      padding: 18px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner { max-width: 1140px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .header-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .header-brand img { height: 40px; width: auto; background: white; border-radius: 4px; padding: 2px 4px; }
+    .header-brand-text .org { font-family: var(--font-serif); font-size: 11px; color: var(--purple-light); letter-spacing: .05em; text-transform: uppercase; }
+    .header-brand-text .title { font-family: var(--font-serif); font-size: 15px; color: var(--white); font-weight: 700; line-height: 1.2; }
+    nav { display: flex; gap: 6px; flex-wrap: wrap; }
+    nav a {
+      color: rgba(255,255,255,.85);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.2);
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    nav a:hover { background: rgba(255,255,255,.12); color: var(--white); text-decoration: none; }
+
+    /* ── Hero ───────────────────────────────────── */
+    #hero { background: linear-gradient(135deg, var(--purple-darker) 0%, var(--purple-dark) 100%); padding: 56px 0 48px; color: var(--white); }
+    .hero-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple-light); margin-bottom: 12px; }
+    .hero-title { font-family: var(--font-serif); font-size: 36px; color: var(--white); line-height: 1.2; margin-bottom: 14px; max-width: 700px; }
+    .hero-sub { font-size: 17px; color: rgba(255,255,255,.8); max-width: 660px; line-height: 1.6; margin-bottom: 36px; }
+    .hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .hero-stat { background: rgba(255,255,255,.1); border-radius: var(--radius); padding: 18px 24px; min-width: 160px; }
+    .hero-stat .h-val { font-family: var(--font-serif); font-size: 30px; font-weight: 700; color: var(--white); line-height: 1; }
+    .hero-stat .h-lbl { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* ── Toggle group ───────────────────────────── */
+    .toggle-group { display: flex; gap: 0; border: 2px solid var(--purple-dark); border-radius: 6px; overflow: hidden; margin-bottom: 20px; align-self: flex-start; }
+    .toggle-group button {
+      background: var(--white);
+      border: none;
+      padding: 8px 16px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--purple-dark);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .toggle-group button.active { background: var(--purple-dark); color: var(--white); }
+
+    /* ── Lookup ─────────────────────────────────── */
+    .lookup-controls { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 28px; }
+    .lookup-controls label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+    .lookup-controls select {
+      display: block;
+      padding: 10px 14px;
+      border: 1.5px solid var(--gray-light);
+      border-radius: var(--radius);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      color: var(--brown-text);
+      min-width: 300px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .lookup-controls select:focus { border-color: var(--purple-accent); }
+    .lookup-mode { display: flex; gap: 0; border: 2px solid var(--purple-dark); border-radius: 6px; overflow: hidden; align-self: flex-end; }
+    .lookup-mode button { background: var(--white); border: none; padding: 10px 18px; font-family: var(--font-sans); font-size: 14px; font-weight: 600; color: var(--purple-dark); cursor: pointer; transition: background .15s; }
+    .lookup-mode button.active { background: var(--purple-dark); color: var(--white); }
+    #stats-panel { display: none; }
+    #stats-panel.visible { display: block; }
+    .stats-header { margin-bottom: 24px; }
+    .stats-header h3 { font-size: 22px; margin-bottom: 4px; }
+    .stats-header .meta { font-size: 14px; color: var(--gray-mid); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .stat-card { background: var(--white); border: 1px solid var(--gray-light); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+    .stat-card .stat-label { font-size: 13px; color: var(--gray-mid); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; font-weight: 600; }
+    .stat-card .stat-value { font-family: var(--font-serif); font-size: 26px; font-weight: 700; color: var(--purple-dark); line-height: 1.1; }
+    .stat-card .stat-compare { font-size: 13px; margin-top: 6px; color: var(--gray-mid); }
+    .stat-card .stat-compare .above { color: #c0392b; font-weight: 600; }
+    .stat-card .stat-compare .below { color: #27ae60; font-weight: 600; }
+    .stat-card.highlight { border-left: 4px solid var(--purple-accent); }
+    .stat-card.quartile-card { grid-column: 1 / -1; }
+    .quartile-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 14px; letter-spacing: .03em; }
+    .quartile-badge.q1 { background: #f0f0f0; color: var(--brown-text); }
+    .quartile-badge.q2 { background: #f7eefb; color: var(--purple-dark); border: 1px solid #dbb6ea; }
+    .quartile-badge.q3 { background: #ead6f5; color: var(--purple-darker); border: 1px solid var(--purple-accent); }
+    .quartile-badge.q4 { background: var(--purple-darker); color: var(--white); }
+    .empty-msg { color: var(--gray-mid); font-style: italic; padding: 24px 0; }
+
+    /* ── Quartile cards ─────────────────────────── */
+    .quartile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+    .q-card { border-radius: var(--radius); padding: 24px 22px; box-shadow: var(--shadow); }
+    .q-card.q1 { background: var(--white); border: 1px solid var(--gray-light); }
+    .q-card.q2 { background: #f7eefb; border: 1px solid #dbb6ea; }
+    .q-card.q3 { background: #ead6f5; border: 1px solid var(--purple-accent); }
+    .q-card.q4 { background: var(--purple-darker); color: var(--white); border: 1px solid var(--purple-darker); }
+    .q-card.q4 .q-label, .q-card.q4 .q-meta { color: rgba(255,255,255,.7); }
+    .q-card.q4 .q-metric-label { color: rgba(255,255,255,.65); }
+    .q-card.q4 .q-metric-value { color: var(--white); }
+    .q-card.q4 .q-bar-fill { background: rgba(255,255,255,.5) !important; }
+    .q-card.q4 .q-bar-bg { background: rgba(255,255,255,.15) !important; }
+    .q-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--gray-mid); margin-bottom: 6px; }
+    .q-title { font-family: var(--font-serif); font-size: 20px; color: var(--purple-dark); margin-bottom: 4px; line-height: 1.2; }
+    .q-card.q4 .q-title { color: var(--white); }
+    .q-meta { font-size: 13px; color: var(--gray-mid); margin-bottom: 18px; }
+    .q-divider { border: none; border-top: 1px solid var(--gray-light); margin: 14px 0; }
+    .q-card.q4 .q-divider { border-color: rgba(255,255,255,.2); }
+    .q-metric { margin-bottom: 12px; }
+    .q-metric-label { font-size: 12px; color: var(--gray-mid); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+    .q-metric-value { font-family: var(--font-serif); font-size: 20px; font-weight: 700; color: var(--purple-dark); line-height: 1.1; }
+    .q-bar-bg { background: var(--gray-light); border-radius: 3px; height: 5px; margin-top: 4px; }
+    .q-bar-fill { background: var(--purple-accent); border-radius: 3px; height: 5px; }
+    .q-card.q2 .q-bar-fill { background: var(--purple-dark); }
+    .q-card.q3 .q-bar-fill { background: var(--purple-darker); }
+    .q-details { margin-top: 14px; border-top: 1px solid var(--gray-light); padding-top: 10px; }
+    .q-card.q4 .q-details { border-color: rgba(255,255,255,.2); }
+    .q-details summary { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gray-mid); cursor: pointer; list-style: none; display: flex; align-items: center; gap: 5px; user-select: none; padding: 2px 0; }
+    .q-card.q4 .q-details summary { color: rgba(255,255,255,.6); }
+    .q-details summary::-webkit-details-marker { display: none; }
+    .q-details summary::before { content: '▶'; font-size: 9px; transition: transform .15s; display: inline-block; }
+    .q-details[open] summary::before { transform: rotate(90deg); }
+    .q-district-list { margin-top: 8px; max-height: 220px; overflow-y: auto; font-size: 12px; line-height: 1.7; color: var(--brown-text); padding-right: 4px; }
+    .q-card.q4 .q-district-list { color: rgba(255,255,255,.85); }
+    .q-district-item { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+    .q-district-item .d-name { flex: 1; }
+    .q-district-item .d-gap { font-variant-numeric: tabular-nums; white-space: nowrap; opacity: .75; }
+
+    /* ── LI chart styles ────────────────────────── */
+    .li-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 36px; max-width: 600px; }
+    .li-county-stat { background: var(--white); border: 1px solid var(--gray-light); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); }
+    .li-county-stat .county-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--purple-dark); margin-bottom: 8px; }
+    .li-county-stat .county-value { font-family: var(--font-serif); font-size: 26px; font-weight: 700; color: var(--purple-darker); line-height: 1; margin-bottom: 4px; }
+    .li-county-stat .county-sub { font-size: 13px; color: var(--gray-mid); }
+    #li-chart-container { width: 100%; overflow-x: auto; }
+    #li-chart { width: 100%; min-width: 600px; display: block; }
+    .li-callout { margin-top: 20px; padding: 16px 20px; background: var(--purple-faint); border-left: 4px solid var(--purple-accent); border-radius: 0 var(--radius) var(--radius) 0; font-size: 15px; line-height: 1.55; max-width: 800px; }
+    .li-callout strong { color: var(--purple-darker); }
+    .li-legend { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--brown-text); }
+    .li-legend-item { display: flex; align-items: center; gap: 6px; }
+    .li-legend-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+    .li-legend-swatch.hollow { background: none; border: 2px solid var(--purple-dark); }
+    .li-search-wrap { margin-bottom: 10px; }
+    #li-search { padding: 7px 12px; border: 1px solid var(--gray-light); border-radius: 6px; font-family: var(--font-sans); font-size: 13px; color: var(--brown-text); width: 260px; max-width: 100%; outline: none; }
+    #li-search:focus { border-color: var(--purple-accent); }
+    #li-q4-section { margin-top: 48px; }
+    #li-q4-chart { width: 100%; display: block; }
+
+    /* ── Map tooltip (shared) ───────────────────── */
+    .map-tooltip { position: fixed; background: var(--purple-darker); color: var(--white); padding: 10px 14px; border-radius: 6px; font-size: 14px; line-height: 1.5; pointer-events: none; opacity: 0; transition: opacity .12s; z-index: 999; max-width: 220px; }
+    .map-tooltip strong { display: block; font-family: var(--font-serif); font-size: 15px; margin-bottom: 3px; }
+
+    /* ── Footer ─────────────────────────────────── */
+    footer { background: var(--purple-darker); color: rgba(255,255,255,.75); padding: 40px 24px; font-size: 14px; }
+    .footer-inner { max-width: 1140px; margin: 0 auto; }
+    footer h4 { color: var(--white); font-size: 16px; margin-bottom: 10px; }
+    footer p { margin-bottom: 6px; line-height: 1.5; }
+    footer a { color: var(--purple-light); }
+    .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+
+    @media (max-width: 680px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .li-intro { grid-template-columns: 1fr; }
+      .lookup-controls select { min-width: 260px; width: 100%; }
+      nav { display: none; }
+      .hero-title { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="map-tooltip" id="map-tooltip"></div>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <a class="header-brand" href="https://www.eraseracismny.org/" target="_blank" rel="noopener">
+      <img src="logo.png" alt="ERASE Racism logo" height="40"/>
+      <div class="header-brand-text">
+        <span class="org">ERASE Racism</span>
+        <span class="title">Long Island School Funding Gap</span>
+      </div>
+    </a>
+    <nav aria-label="Page sections">
+      <a href="#li-lookup">District Lookup</a>
+      <a href="#li-quartile-section">Quartile Analysis</a>
+      <a href="#li-chart-section">Funding Gap Chart</a>
+      <a href="index.html" style="border-color:rgba(255,255,255,.4)">← Statewide View</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══ HERO ════════════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Long Island Deep Dive</div>
+    <h1 class="hero-title">Nassau &amp; Suffolk County School Funding Gap</h1>
+    <p class="hero-sub">Nassau and Suffolk counties are home to some of the most dramatic school funding inequities in New York State — with some districts facing per-pupil gaps of over $40,000 while neighboring districts receive more than the updated formula would provide.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="h-val" id="li-hero-gap-total">—</div>
+        <div class="h-lbl">Total LI Funding Gap</div>
+      </div>
+      <div class="hero-stat">
+        <div class="h-val" id="li-hero-gap-pp">—</div>
+        <div class="h-lbl">Avg Per-Pupil Gap</div>
+      </div>
+      <div class="hero-stat">
+        <div class="h-val" id="li-hero-districts">—</div>
+        <div class="h-lbl">Districts Analyzed</div>
+      </div>
+      <div class="hero-stat">
+        <div class="h-val" id="li-hero-enrollment">—</div>
+        <div class="h-lbl">Students Enrolled</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DISTRICT LOOKUP ════════════════════════════════════════════════════ -->
+<section id="li-lookup" class="section" aria-labelledby="li-lookup-title">
+  <div class="container">
+    <h2 class="section-title" id="li-lookup-title">District &amp; County Lookup</h2>
+    <p class="section-sub">Select a Long Island school district or county to see key funding gap statistics compared to the Long Island average.</p>
+
+    <div class="lookup-controls">
+      <div class="lookup-mode" role="group" aria-label="View by district or county">
+        <button class="active" id="mode-district" onclick="setLookupMode('district')">By District</button>
+        <button id="mode-county" onclick="setLookupMode('county')">By County</button>
+      </div>
+      <div>
+        <label for="lookup-select" id="lookup-label">Choose a school district</label>
+        <select id="lookup-select" aria-labelledby="lookup-label" onchange="renderLookup()">
+          <option value="">— Select a district —</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="stats-panel" role="region" aria-live="polite">
+      <div class="stats-header">
+        <h3 id="stats-name"></h3>
+        <div class="meta" id="stats-meta"></div>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+    </div>
+    <p class="empty-msg" id="lookup-empty">Select a district or county above to view statistics.</p>
+  </div>
+</section>
+
+<!-- ══ QUARTILE ANALYSIS ══════════════════════════════════════════════════ -->
+<section id="li-quartile-section" class="section section-alt" aria-labelledby="li-q-title">
+  <div class="container">
+    <h2 class="section-title" id="li-q-title">Analysis by Per-Pupil Funding Gap Quartiles</h2>
+    <p class="section-sub">Long Island districts grouped by their statewide per-pupil funding gap quartile ranking. Q4 districts have the largest gaps and are concentrated in communities with the highest need.</p>
+    <div class="quartile-grid" id="li-quartile-grid" role="list"></div>
+  </div>
+</section>
+
+<!-- ══ LONG ISLAND CHART ══════════════════════════════════════════════════ -->
+<section id="li-chart-section" class="section" aria-labelledby="li-chart-title">
+  <div class="container">
+    <h2 class="section-title" id="li-chart-title">Long Island: Extreme Inequity in Plain Sight</h2>
+    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $6.9 billion — $2.7 billion in Nassau and $4.2 billion in Suffolk. Both counties currently receive far less than the updated formula would entitle them to, at 186% and 193% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of upwards of $40,000 while others are currently receiving more money than the updated formula would allow.</p>
+
+    <div class="li-intro" id="li-intro"></div>
+
+    <div class="toggle-group" role="group" aria-label="Long Island chart metric">
+      <button class="active" id="li-toggle-pp" onclick="setLIMetric('pp')">Per-Pupil Gap ($)</button>
+      <button id="li-toggle-pct" onclick="setLIMetric('pct')">% of Revenue</button>
+    </div>
+
+    <div class="li-legend">
+      <div class="li-legend-item">
+        <div class="li-legend-swatch" style="background:#6B2680"></div>
+        <span>Nassau County — underfunded</span>
+      </div>
+      <div class="li-legend-item">
+        <div class="li-legend-swatch" style="background:#AE43CE"></div>
+        <span>Suffolk County — underfunded</span>
+      </div>
+      <div class="li-legend-item">
+        <div class="li-legend-swatch hollow" style="border-color:#6B2680"></div>
+        <span>Nassau County — receiving more than updated formula</span>
+      </div>
+      <div class="li-legend-item">
+        <div class="li-legend-swatch hollow" style="border-color:#AE43CE"></div>
+        <span>Suffolk County — receiving more than updated formula</span>
+      </div>
+    </div>
+
+    <div class="li-search-wrap">
+      <input type="text" id="li-search" placeholder="Search for a district to highlight…" oninput="liChartSearch(this.value)" aria-label="Search Long Island districts">
+    </div>
+
+    <div id="li-chart-container">
+      <svg id="li-chart" role="img" aria-label="Diverging bar chart of Long Island school district funding gaps"></svg>
+    </div>
+
+    <div class="li-callout" id="li-callout"></div>
+
+    <div id="li-q4-section">
+      <h3 style="font-family:var(--font-serif);font-size:22px;color:var(--purple-dark);margin-bottom:8px;margin-top:48px">Q4 Long Island Districts: High Need, Highest Gap</h3>
+      <p style="font-size:15px;color:var(--gray-mid);margin-bottom:20px;max-width:680px">How Q4 Long Island districts — those with the largest per-pupil funding gaps — compare to the Long Island average across key demographic and need indicators.</p>
+      <svg id="li-q4-chart" role="img" aria-label="Comparison of Q4 Long Island districts vs Long Island average"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <h4>About This Analysis</h4>
+        <p>This interactive visualization presents findings from ERASE Racism's March 2026 report on New York State's Foundation Aid formula, with a focus on Long Island's Nassau and Suffolk counties.</p>
+        <p style="margin-top:10px;"><a href="https://www.eraseracismny.org/" target="_blank" rel="noopener">eraseracismny.org ↗</a></p>
+      </div>
+      <div>
+        <h4>Data Sources</h4>
+        <p>New York State Education Department (NYSED) — Foundation Aid, demographics, ELA assessment results, 2024–25</p>
+        <p>U.S. Census Bureau — SAIPE poverty estimates, 2024</p>
+        <p>National Center for Education Statistics (NCES) — Comparable Wage Index for Teachers (CWIFT), 2022</p>
+        <p style="margin-top:10px; font-size:13px; opacity:.75;">Analysis &amp; visualization by <a href="https://www.north-arrow.org/" target="_blank" rel="noopener" style="color:var(--purple-light)">North Arrow ↗</a> for ERASE Racism, March 2026</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ DATA ════════════════════════════════════════════════════════════════ -->
+<script src="data.js"></script>
+
+<!-- ══ JAVASCRIPT ══════════════════════════════════════════════════════════ -->
+<script>
+const fmt = {
+  dollar:  v => v == null ? 'N/A' : '$' + Math.round(v).toLocaleString(),
+  dollarB: v => v == null ? 'N/A' : '$' + (v / 1e9).toFixed(1) + 'B',
+  dollarM: v => v == null ? 'N/A' : '$' + (v / 1e6).toFixed(1) + 'M',
+  pct:     v => v == null ? 'N/A' : v.toFixed(1) + '%',
+  num:     v => v == null ? 'N/A' : Math.round(v).toLocaleString(),
+  ratio:   v => v == null ? 'N/A' : v.toFixed(2) + 'x',
+};
+
+// Filter to LI only
+const RECORDS = DISTRICT_DATA.filter(r => r.county === 'Nassau' || r.county === 'Suffolk');
+
+// County aggregates (LI only)
+function buildCountyData(records) {
+  const byCounty = {};
+  for (const r of records) {
+    if (!r.county) continue;
+    if (!byCounty[r.county]) byCounty[r.county] = [];
+    byCounty[r.county].push(r);
+  }
+  const out = {};
+  for (const [county, recs] of Object.entries(byCounty)) {
+    const totalEnroll = recs.reduce((s, r) => s + (r.enrollment || 0), 0);
+    const wAvg = (field) => {
+      let num = 0, den = 0;
+      for (const r of recs) { if (r[field] != null && r.enrollment) { num += r[field] * r.enrollment; den += r.enrollment; } }
+      return den > 0 ? num / den : null;
+    };
+    const avg = (field) => {
+      const vals = recs.map(r => r[field]).filter(v => v != null);
+      return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    };
+    const totalGap = recs.reduce((s,r) => s + (r.gap_total||0), 0);
+    const totalFA  = recs.reduce((s,r) => s + (r.current_fa||0), 0);
+    const quartileCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
+    for (const r of recs) { if (r.quartile && quartileCounts[r.quartile] != null) quartileCounts[r.quartile]++; }
+    out[county] = {
+      county, district: county, enrollment: totalEnroll, num_districts: recs.length,
+      gap_total: totalGap,
+      gap_pp:   totalEnroll > 0 ? totalGap / totalEnroll : null,
+      gap_pct:  totalFA     > 0 ? (totalGap / totalFA) * 100 : null,
+      pct_poc:  wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'),
+      pct_prof: wAvg('pct_prof'), cwr: avg('cwr'), current_fa: totalFA,
+      quartile_counts: quartileCounts,
+    };
+  }
+  return out;
+}
+
+// LI-wide average (serves as the "state average" comparison on this page)
+function buildLIAvg(records) {
+  const totalEnroll = records.reduce((s,r) => s + (r.enrollment||0), 0);
+  const totalGap    = records.reduce((s,r) => s + (r.gap_total||0), 0);
+  const totalFA     = records.reduce((s,r) => s + (r.current_fa||0), 0);
+  const wAvg = (field) => {
+    let num = 0, den = 0;
+    for (const r of records) { if (r[field] != null && r.enrollment) { num += r[field]*r.enrollment; den += r.enrollment; } }
+    return den > 0 ? num/den : null;
+  };
+  return {
+    district: 'Long Island Average',
+    enrollment: totalEnroll, gap_total: totalGap,
+    gap_pp:   totalEnroll > 0 ? totalGap / totalEnroll : null,
+    gap_pct:  totalFA     > 0 ? (totalGap / totalFA) * 100 : null,
+    pct_poc: wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'),
+    pct_prof: wAvg('pct_prof'), cwr: wAvg('cwr'),
+  };
+}
+
+function buildQuartileData(records) {
+  const qs = {Q1:[], Q2:[], Q3:[], Q4:[]};
+  for (const r of records) { if (r.quartile && qs[r.quartile]) qs[r.quartile].push(r); }
+  const out = {};
+  for (const [q, recs] of Object.entries(qs)) {
+    if (!recs.length) continue;
+    const totalEnroll = recs.reduce((s,r)=>s+(r.enrollment||0),0);
+    const wAvg = (field) => {
+      let num=0,den=0;
+      for (const r of recs) { if (r[field]!=null && r.enrollment) { num+=r[field]*r.enrollment; den+=r.enrollment; } }
+      return den>0?num/den:null;
+    };
+    const sAvg = (field) => { const v = recs.map(r=>r[field]).filter(v=>v!=null); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+    const totalGap = recs.reduce((s,r)=>s+(r.gap_total||0),0);
+    const totalFA  = recs.reduce((s,r)=>s+(r.current_fa||0),0);
+    out[q] = {
+      quartile: q, num_districts: recs.length, enrollment: totalEnroll, gap_total: totalGap,
+      gap_pp:   totalEnroll > 0 ? totalGap / totalEnroll : null,
+      gap_pct:  totalFA     > 0 ? (totalGap / totalFA) * 100 : null,
+      pct_poc: wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'), pct_prof: wAvg('pct_prof'), cwr: sAvg('cwr'),
+    };
+  }
+  return out;
+}
+
+const COUNTY_DATA    = buildCountyData(RECORDS);
+const LI_AVG         = buildLIAvg(RECORDS);
+const QUARTILE_DATA  = buildQuartileData(RECORDS);
+const QUARTILE_LABELS = { Q1: 'Smallest Gap', Q2: 'Moderate Gap', Q3: 'Large Gap', Q4: 'Largest Gap' };
+
+/* ── Lookup ──────────────────────────────────────────────────────────────── */
+let lookupMode = 'district';
+
+function setLookupMode(mode) {
+  lookupMode = mode;
+  document.getElementById('mode-district').classList.toggle('active', mode==='district');
+  document.getElementById('mode-county').classList.toggle('active', mode==='county');
+  document.getElementById('lookup-label').textContent = mode==='district' ? 'Choose a school district' : 'Choose a county';
+  populateSelect();
+  document.getElementById('stats-panel').classList.remove('visible');
+  document.getElementById('lookup-empty').style.display = '';
+}
+
+function populateSelect() {
+  const sel = document.getElementById('lookup-select');
+  sel.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = lookupMode === 'district' ? '— Select a district —' : '— Select a county —';
+  sel.appendChild(placeholder);
+  if (lookupMode === 'district') {
+    const sorted = [...RECORDS].sort((a,b)=>(a.district||'').localeCompare(b.district||''));
+    for (const r of sorted) {
+      const opt = document.createElement('option');
+      opt.value = r.district; opt.textContent = r.district;
+      sel.appendChild(opt);
+    }
+  } else {
+    for (const c of Object.keys(COUNTY_DATA).sort()) {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    }
+  }
+}
+
+function renderLookup() {
+  const sel = document.getElementById('lookup-select').value;
+  if (!sel) {
+    document.getElementById('stats-panel').classList.remove('visible');
+    document.getElementById('lookup-empty').style.display = '';
+    history.replaceState(null, '', window.location.pathname);
+    return;
+  }
+  document.getElementById('lookup-empty').style.display = 'none';
+  const d = lookupMode === 'district' ? RECORDS.find(r => r.district === sel) : COUNTY_DATA[sel];
+  if (!d) return;
+
+  history.replaceState(null, '', '#' + (lookupMode === 'district' ? 'district=' + encodeURIComponent(sel) : 'county=' + encodeURIComponent(sel)));
+
+  document.getElementById('stats-name').textContent = d.district || d.county || sel;
+  document.getElementById('stats-meta').textContent = lookupMode === 'district'
+    ? `${d.county} County · ${fmt.num(d.enrollment)} students`
+    : `${d.num_districts} districts · ${fmt.num(d.enrollment)} students`;
+
+  const metrics = [
+    { label: 'Total Funding Gap', field: 'gap_total', format: fmt.dollarM, highlight: true },
+    { label: 'Per-Pupil Gap', field: 'gap_pp', format: fmt.dollar, highlight: true },
+    { label: 'Gap as % of Revenue', field: 'gap_pct', format: v => fmt.pct(v), highlight: true },
+    { label: '% Students of Color', field: 'pct_poc', format: fmt.pct },
+    { label: '% Economically Disadvantaged', field: 'pct_ecdis', format: fmt.pct },
+    { label: '% Proficient (ELA, Grades 3–8)', field: 'pct_prof', format: fmt.pct },
+    { label: 'Combined Wealth Ratio', field: 'cwr', format: fmt.ratio },
+    { label: 'Enrollment', field: 'enrollment', format: fmt.num },
+  ];
+
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = '';
+
+  // Quartile card
+  if (lookupMode === 'district' && d.quartile) {
+    const qCard = document.createElement('div');
+    qCard.className = 'stat-card quartile-card';
+    qCard.innerHTML = `<div class="stat-label">Quartile Ranking (Per-Pupil Gap)</div>
+      <div style="margin-top:8px"><span class="quartile-badge ${d.quartile.toLowerCase()}">${d.quartile} — ${QUARTILE_LABELS[d.quartile]||''}</span></div>
+      <div class="stat-compare" style="margin-top:8px">Districts are ranked Q1 (smallest gap) to Q4 (largest gap) by per-pupil funding gap statewide.</div>`;
+    grid.appendChild(qCard);
+  } else if (lookupMode === 'county' && d.quartile_counts) {
+    const qc = d.quartile_counts;
+    const qCard = document.createElement('div');
+    qCard.className = 'stat-card quartile-card';
+    qCard.innerHTML = `<div class="stat-label">Quartile Distribution</div>
+      <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+        ${['Q4','Q3','Q2','Q1'].map(q => qc[q] > 0 ? `<span class="quartile-badge ${q.toLowerCase()}">${q}: ${qc[q]} district${qc[q]!==1?'s':''}</span>` : '').join('')}
+      </div>`;
+    grid.appendChild(qCard);
+  }
+
+  for (const m of metrics) {
+    const val = d[m.field];
+    const avgVal = LI_AVG[m.field];
+    const card = document.createElement('div');
+    card.className = 'stat-card' + (m.highlight ? ' highlight' : '');
+    let compareHTML = '';
+    if (avgVal != null && val != null && m.field !== 'enrollment') {
+      const diff = val - avgVal;
+      const pctDiff = avgVal !== 0 ? Math.abs(diff/avgVal)*100 : 0;
+      const isGapField = ['gap_total','gap_pp','gap_pct'].includes(m.field);
+      const isAbove = diff > 0;
+      const aboveClass = (isGapField && isAbove) || (!isGapField && m.field==='pct_poc' && isAbove) ? 'above' : isAbove ? '' : 'below';
+      const sign = diff > 0 ? '+' : '';
+      compareHTML = `<div class="stat-compare">LI avg: ${m.format(avgVal)} <span class="${aboveClass}">(${sign}${pctDiff.toFixed(0)}%)</span></div>`;
+    }
+    card.innerHTML = `<div class="stat-label">${m.label}</div><div class="stat-value">${val != null ? m.format(val) : 'N/A'}</div>${compareHTML}`;
+    grid.appendChild(card);
+  }
+  document.getElementById('stats-panel').classList.add('visible');
+}
+
+function applyHashLookup() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  const district = params.get('district');
+  const county   = params.get('county');
+  if (district && RECORDS.find(r => r.district === district)) {
+    setLookupMode('district');
+    document.getElementById('lookup-select').value = district;
+    renderLookup();
+  } else if (county && COUNTY_DATA[county]) {
+    setLookupMode('county');
+    document.getElementById('lookup-select').value = county;
+    renderLookup();
+  }
+}
+
+/* ── Quartile cards ──────────────────────────────────────────────────────── */
+function renderQuartileCards() {
+  const container = document.getElementById('li-quartile-grid');
+  const order = ['Q1','Q2','Q3','Q4'].filter(q => QUARTILE_DATA[q]);
+  if (!order.length) { container.innerHTML = '<p class="empty-msg">No quartile data available.</p>'; return; }
+  const maxGapPP  = Math.max(...order.map(q => QUARTILE_DATA[q]?.gap_pp  || 0));
+  const maxGapPct = Math.max(...order.map(q => QUARTILE_DATA[q]?.gap_pct || 0));
+  const maxPOC    = Math.max(...order.map(q => QUARTILE_DATA[q]?.pct_poc || 0));
+  const maxEcdis  = Math.max(...order.map(q => QUARTILE_DATA[q]?.pct_ecdis || 0));
+
+  for (const q of order) {
+    const data = QUARTILE_DATA[q];
+    const cls = q.toLowerCase();
+    const bar = (val, max) => { const pct = max > 0 ? (val||0)/max*100 : 0; return `<div class="q-bar-bg"><div class="q-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>`; };
+    const qDistricts = RECORDS.filter(r => r.quartile === q).sort((a,b) => (b.gap_pp||0)-(a.gap_pp||0));
+    const districtRows = qDistricts.map(r => `<div class="q-district-item"><span class="d-name">${r.district}</span><span class="d-gap">${r.gap_pp != null ? fmt.dollar(r.gap_pp) : 'N/A'}</span></div>`).join('');
+    const html = `
+      <div class="q-label">${q} — ${QUARTILE_LABELS[q]}</div>
+      <div class="q-title">${fmt.dollar(data.gap_pp)} / pupil</div>
+      <div class="q-meta">${data.num_districts} districts · ${fmt.num(data.enrollment)} students</div>
+      <hr class="q-divider"/>
+      <div class="q-metric"><div class="q-metric-label">Total Funding Gap</div><div class="q-metric-value">${fmt.dollarB(data.gap_total)}</div>${bar(data.gap_total, Math.max(...order.map(q2=>QUARTILE_DATA[q2]?.gap_total||0)))}</div>
+      <div class="q-metric"><div class="q-metric-label">Gap as % of Revenue</div><div class="q-metric-value">${fmt.pct(data.gap_pct)}</div>${bar(data.gap_pct, maxGapPct)}</div>
+      <hr class="q-divider"/>
+      <div class="q-metric"><div class="q-metric-label">Students of Color</div><div class="q-metric-value">${fmt.pct(data.pct_poc)}</div>${bar(data.pct_poc, maxPOC)}</div>
+      <div class="q-metric"><div class="q-metric-label">Economically Disadvantaged</div><div class="q-metric-value">${fmt.pct(data.pct_ecdis)}</div>${bar(data.pct_ecdis, maxEcdis)}</div>
+      <div class="q-metric"><div class="q-metric-label">ELA Proficiency (3–8)</div><div class="q-metric-value">${fmt.pct(data.pct_prof)}</div>${bar(data.pct_prof, 100)}</div>
+      <hr class="q-divider"/>
+      <div class="q-metric"><div class="q-metric-label">Combined Wealth Ratio</div><div class="q-metric-value">${fmt.ratio(data.cwr)}</div></div>
+      <details class="q-details"><summary>${qDistricts.length} districts — click to expand</summary><div class="q-district-list">${districtRows}</div></details>`;
+    const card = document.createElement('div');
+    card.className = `q-card ${cls}`;
+    card.setAttribute('role', 'listitem');
+    card.innerHTML = html;
+    container.appendChild(card);
+  }
+}
+
+/* ── LI Intro stat boxes ─────────────────────────────────────────────────── */
+function renderLIIntro() {
+  const container = document.getElementById('li-intro');
+  for (const [name, key] of [['Nassau County','Nassau'],['Suffolk County','Suffolk']]) {
+    const data = COUNTY_DATA[key];
+    if (!data) continue;
+    const div = document.createElement('div');
+    div.className = 'li-county-stat';
+    div.innerHTML = `<div class="county-name">${name}</div>
+      <div class="county-value">${fmt.dollarB(data.gap_total)}</div>
+      <div class="county-sub">total funding gap</div>
+      <div class="county-sub" style="margin-top:4px">${data.num_districts} districts · ${fmt.num(data.enrollment)} students</div>`;
+    container.appendChild(div);
+  }
+}
+
+/* ── LI Diverging Bar Chart ──────────────────────────────────────────────── */
+let liMetric = 'pp';
+
+function setLIMetric(metric) {
+  liMetric = metric;
+  document.getElementById('li-toggle-pp').classList.toggle('active', metric==='pp');
+  document.getElementById('li-toggle-pct').classList.toggle('active', metric==='pct');
+  drawLIChart();
+}
+
+function liChartSearch(query) {
+  const q = query.trim().toLowerCase();
+  const svgEl = document.getElementById('li-chart');
+  const groups = svgEl.querySelectorAll('g[data-district]');
+  if (!q) { groups.forEach(g => g.setAttribute('opacity', 1)); return; }
+  groups.forEach(g => {
+    const name = g.getAttribute('data-district') || '';
+    g.setAttribute('opacity', name.includes(q) ? 1 : 0.1);
+  });
+}
+
+function drawLIChart() {
+  const liDistricts = RECORDS
+    .sort((a, b) => (b[liMetric === 'pp' ? 'gap_pp' : 'gap_pct'] || 0) - (a[liMetric === 'pp' ? 'gap_pp' : 'gap_pct'] || 0));
+
+  const field = liMetric === 'pp' ? 'gap_pp' : 'gap_pct';
+  const vals = liDistricts.map(d => d[field] || 0);
+  const maxAbs = Math.max(Math.abs(d3.min(vals)), Math.abs(d3.max(vals)));
+
+  const marginLeft = 185, marginRight = 20, marginTop = 62, marginBottom = 10;
+  const rowH = 14;
+  const H = liDistricts.length * rowH + marginTop + marginBottom;
+  const W = Math.max(700, 900);
+  const chartW = W - marginLeft - marginRight;
+  const PURPLE = '#6B2680', LIGHT_PURPLE = '#AE43CE';
+
+  const svg = d3.select('#li-chart')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('height', H);
+  svg.selectAll('*').remove();
+
+  const xScale = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([marginLeft, W - marginRight]);
+
+  svg.append('text').attr('x', xScale(-maxAbs * 0.5)).attr('y', 16)
+    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', '#666')
+    .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
+    .text('← Currently receiving more than updated formula');
+  svg.append('text').attr('x', xScale(maxAbs * 0.5)).attr('y', 16)
+    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', PURPLE)
+    .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
+    .text('Underfunded relative to updated formula →');
+
+  const ticks = d3.range(-maxAbs, maxAbs * 1.01, maxAbs * 2 / 5);
+  const g = svg.append('g');
+  for (const t of ticks) {
+    const x = xScale(t);
+    g.append('line').attr('x1', x).attr('y1', marginTop - 6).attr('x2', x).attr('y2', H - marginBottom).attr('stroke', '#e0e0e0').attr('stroke-width', 1);
+    g.append('text').attr('x', x).attr('y', marginTop - 10).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#949494')
+      .attr('font-family', "'Source Sans 3', sans-serif")
+      .text(liMetric === 'pp' ? (t === 0 ? '$0' : (t > 0 ? '+' : '') + '$' + Math.abs(Math.round(t/1000)) + 'K') : (t === 0 ? '0%' : (t > 0 ? '+' : '') + Math.abs(Math.round(t)) + '%'));
+  }
+  svg.append('line').attr('x1', xScale(0)).attr('y1', marginTop - 6).attr('x2', xScale(0)).attr('y2', H - marginBottom).attr('stroke', '#3D3630').attr('stroke-width', 1.5);
+
+  const barsG = svg.append('g');
+  liDistricts.forEach((d, i) => {
+    const val = d[field] || 0;
+    const y = marginTop + i * rowH;
+    const x0 = xScale(0), x1 = xScale(val);
+    const barW = Math.abs(x1 - x0);
+    const barX = val >= 0 ? x0 : x0 - barW;
+    const isPositive = val >= 0;
+    const countyColor = d.county === 'Nassau' ? PURPLE : LIGHT_PURPLE;
+    const distG = barsG.append('g').attr('data-district', d.district.toLowerCase());
+    const barRect = distG.append('rect').attr('x', barX).attr('y', y + 1).attr('width', Math.max(barW, 2)).attr('height', rowH - 2).attr('rx', 1);
+    if (isPositive) { barRect.attr('fill', countyColor).attr('opacity', 0.85); }
+    else { barRect.attr('fill', 'none').attr('stroke', countyColor).attr('stroke-width', 1.5).attr('opacity', 0.9); }
+    const shortName = d.district.replace(/ UNION FREE SD$/i,'').replace(/ CENTRAL SD$/i,'').replace(/ CITY SD$/i,'').replace(/ UFSD$/i,'').replace(/ CSD$/i,'');
+    distG.append('text').attr('x', marginLeft - 4).attr('y', y + rowH - 3).attr('text-anchor', 'end').attr('font-size', 9.5).attr('fill', countyColor).attr('font-family', "'Source Sans 3', sans-serif").text(shortName);
+    distG.append('rect').attr('x', 0).attr('y', y).attr('width', W).attr('height', rowH).attr('fill', 'transparent')
+      .on('mousemove', function(event) {
+        const valStr = liMetric === 'pp' ? fmt.dollar(d[field]) : fmt.pct(d[field]);
+        const tip = document.getElementById('map-tooltip');
+        tip.innerHTML = `<strong>${d.district}</strong>${d.county} County<br>${liMetric==='pp'?'Per-Pupil Gap':'% of Revenue'}: ${valStr}<br>Students of Color: ${fmt.pct(d.pct_poc)}<br>Enrollment: ${fmt.num(d.enrollment)}`;
+        tip.style.opacity = '1'; tip.style.left = (event.clientX + 14) + 'px'; tip.style.top = (event.clientY - 10) + 'px';
+      })
+      .on('mouseleave', () => { document.getElementById('map-tooltip').style.opacity = '0'; });
+  });
+  const searchEl = document.getElementById('li-search');
+  if (searchEl && searchEl.value.trim()) liChartSearch(searchEl.value);
+}
+
+/* ── LI Callout ──────────────────────────────────────────────────────────── */
+function renderLICallout() {
+  const callout = document.getElementById('li-callout');
+  const sorted = [...RECORDS].sort((a,b)=>(b.gap_pp||0)-(a.gap_pp||0));
+  const shortName = d => d.district.replace(/ (UNION FREE SD|CENTRAL SD|CITY SD|UFSD|CSD|COMMON SD)$/i,'');
+  const top3Names = sorted.slice(0,3).map(shortName).join(', ');
+  const topQ = sorted.slice(0, Math.ceil(sorted.length/4));
+  const avgCWR = topQ.reduce((s,r)=>s+(r.cwr||0),0)/topQ.filter(r=>r.cwr!=null).length;
+  const avgELA = topQ.filter(r=>r.pct_prof!=null);
+  const avgELApct = avgELA.length ? avgELA.reduce((s,r)=>s+r.pct_prof,0)/avgELA.length : null;
+  const avgPOC = topQ.filter(r=>r.pct_poc!=null);
+  const avgPOCpct = avgPOC.length ? avgPOC.reduce((s,r)=>s+r.pct_poc,0)/avgPOC.length : null;
+  const bot3Names = sorted.slice(-3).map(shortName).join(', ');
+  const botQ = sorted.slice(Math.floor(sorted.length*3/4));
+  const botPOC = botQ.filter(r=>r.pct_poc!=null);
+  const botPOCpct = botPOC.length ? botPOC.reduce((s,r)=>s+r.pct_poc,0)/botPOC.length : null;
+  callout.innerHTML = `The districts facing the largest funding gaps — including <strong>${top3Names}</strong> — are communities where the need is highest and the resources are thinnest. Their average Combined Wealth Ratio is just <strong>${avgCWR != null ? avgCWR.toFixed(2)+'x' : 'N/A'}</strong>, well below the state standard of 1.0x, and only <strong>${avgELApct != null ? Math.round(avgELApct)+'%' : 'N/A'}</strong> of their students are proficient on grades 3–8 ELA assessments. These are also the districts where students of color are concentrated — averaging <strong>${avgPOCpct != null ? Math.round(avgPOCpct)+'%' : 'N/A'}</strong> students of color — a direct consequence of Long Island's long history of structural racism in education, including decades of exclusionary zoning, redlining, and school district boundary-drawing that continue to produce a separate and unequal school system today. Meanwhile, districts such as <strong>${bot3Names}</strong> — which serve far fewer students of color (averaging ${botPOCpct != null ? Math.round(botPOCpct) : 'N/A'}%) — benefit disproportionately from the current, out-of-date formula.`;
+}
+
+/* ── LI Q4 Demographics Chart ────────────────────────────────────────────── */
+function drawLIQ4Chart() {
+  const liAll = RECORDS;
+  const liQ4  = RECORDS.filter(r => r.quartile === 'Q4');
+  const wPool = (recs, field) => {
+    const valid = recs.filter(r => r[field] != null && r.enrollment);
+    if (!valid.length) return null;
+    const sumW = valid.reduce((s,r) => s + r.enrollment, 0);
+    return valid.reduce((s,r) => s + r[field] * r.enrollment, 0) / sumW;
+  };
+  const gapPool = recs => {
+    const tot = recs.reduce((s,r) => s + (r.gap_total||0), 0);
+    const enr = recs.reduce((s,r) => s + (r.enrollment||0), 0);
+    return enr > 0 ? tot / enr : null;
+  };
+  const liAvg = { pct_poc: wPool(liAll,'pct_poc'), pct_ecdis: wPool(liAll,'pct_ecdis'), pct_prof: wPool(liAll,'pct_prof'), cwr: wPool(liAll,'cwr'), gap_pp: gapPool(liAll) };
+  const q4Avg = { pct_poc: wPool(liQ4,'pct_poc'), pct_ecdis: wPool(liQ4,'pct_ecdis'), pct_prof: wPool(liQ4,'pct_prof'), cwr: wPool(liQ4,'cwr'), gap_pp: gapPool(liQ4) };
+  const metrics = [
+    { key: 'pct_poc',   label: '% Students of Color',         fmt: v => v.toFixed(1)+'%' },
+    { key: 'pct_ecdis', label: '% Economically Disadvantaged', fmt: v => v.toFixed(1)+'%' },
+    { key: 'pct_prof',  label: '% Proficient (ELA Gr 3–8)',    fmt: v => v.toFixed(1)+'%' },
+    { key: 'cwr',       label: 'Combined Wealth Ratio',        fmt: v => v.toFixed(2)+'x' },
+    { key: 'gap_pp',    label: 'Per-Pupil Funding Gap',        fmt: v => '$'+Math.round(v).toLocaleString() },
+  ];
+  const W=800, rowH=72, mL=210, mR=20, mT=44, mB=10;
+  const H = metrics.length * rowH + mT + mB;
+  const PURPLE='#6B2680', GRAY='#888', FONT="'Source Sans 3', sans-serif";
+  const svg = d3.select('#li-q4-chart').attr('viewBox',`0 0 ${W} ${H}`).attr('height', H);
+  svg.selectAll('*').remove();
+  svg.append('circle').attr('cx', mL+10).attr('cy', 20).attr('r', 7).attr('fill', GRAY);
+  svg.append('text').attr('x', mL+22).attr('y', 24).attr('font-size', 12).attr('fill', GRAY).attr('font-family', FONT).text('Long Island Average');
+  svg.append('circle').attr('cx', mL+165).attr('cy', 20).attr('r', 7).attr('fill', PURPLE);
+  svg.append('text').attr('x', mL+177).attr('y', 24).attr('font-size', 12).attr('fill', PURPLE).attr('font-family', FONT).text('Q4 Districts');
+  metrics.forEach((m, i) => {
+    const liVal = liAvg[m.key], q4Val = q4Avg[m.key];
+    if (liVal == null || q4Val == null) return;
+    const cy = mT + i * rowH + rowH / 2;
+    const xSc = d3.scaleLinear().domain([0, Math.max(liVal, q4Val) * 1.12]).range([mL, W - mR]);
+    const xLi = xSc(liVal), xQ4 = xSc(q4Val);
+    svg.append('line').attr('x1', Math.min(xLi,xQ4)).attr('y1', cy).attr('x2', Math.max(xLi,xQ4)).attr('y2', cy).attr('stroke', '#ddd').attr('stroke-width', 2);
+    svg.append('circle').attr('cx', xLi).attr('cy', cy).attr('r', 8).attr('fill', GRAY);
+    svg.append('text').attr('x', xLi).attr('y', cy-13).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', GRAY).attr('font-family', FONT).text(m.fmt(liVal));
+    svg.append('circle').attr('cx', xQ4).attr('cy', cy).attr('r', 8).attr('fill', PURPLE);
+    svg.append('text').attr('x', xQ4).attr('y', cy-13).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', PURPLE).attr('font-family', FONT).text(m.fmt(q4Val));
+    svg.append('text').attr('x', mL-10).attr('y', cy+4).attr('text-anchor', 'end').attr('font-size', 12).attr('fill', '#3D3630').attr('font-family', FONT).text(m.label);
+    if (i < metrics.length-1) svg.append('line').attr('x1', 0).attr('y1', mT+(i+1)*rowH).attr('x2', W).attr('y2', mT+(i+1)*rowH).attr('stroke', '#f0f0f0').attr('stroke-width', 1);
+  });
+}
+
+/* ── Init ────────────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  const totalGap = RECORDS.reduce((s,r) => s+(r.gap_total||0),0);
+  const totalEnroll = RECORDS.reduce((s,r) => s+(r.enrollment||0),0);
+  document.getElementById('li-hero-gap-total').textContent  = fmt.dollarB(totalGap);
+  document.getElementById('li-hero-gap-pp').textContent     = fmt.dollar(totalGap / totalEnroll);
+  document.getElementById('li-hero-districts').textContent  = RECORDS.length.toLocaleString();
+  document.getElementById('li-hero-enrollment').textContent = fmt.num(totalEnroll);
+
+  populateSelect();
+  renderQuartileCards();
+  renderLIIntro();
+  drawLIChart();
+  renderLICallout();
+  drawLIQ4Chart();
+
+  applyHashLookup();
+  window.addEventListener('hashchange', applyHashLookup);
+});
+</script>
+</body>
+</html>
