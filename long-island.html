@@ -78,7 +78,7 @@
     .hero-stat .h-lbl { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 
     /* ── Toggle group ───────────────────────────── */
-    .toggle-group { display: flex; gap: 0; border: 2px solid var(--purple-dark); border-radius: 6px; overflow: hidden; margin-bottom: 20px; align-self: flex-start; }
+    .toggle-group { display: inline-flex; gap: 0; border: 2px solid var(--purple-dark); border-radius: 6px; overflow: hidden; margin-bottom: 20px; width: fit-content; }
     .toggle-group button {
       background: var(--white);
       border: none;
@@ -223,7 +223,7 @@
       <img src="logo.png" alt="ERASE Racism logo" height="40"/>
       <div class="header-brand-text">
         <span class="org">ERASE Racism</span>
-        <span class="title">Long Island School Funding Gap</span>
+        <span class="title">Long Island School District Funding Gap</span>
       </div>
     </a>
     <nav aria-label="Page sections">
@@ -316,20 +316,12 @@
 
     <div class="li-legend">
       <div class="li-legend-item">
-        <div class="li-legend-swatch" style="background:#6B2680"></div>
-        <span>Nassau County — underfunded</span>
+        <div class="li-legend-swatch" style="background:#57146D"></div>
+        <span>Nassau County</span>
       </div>
       <div class="li-legend-item">
-        <div class="li-legend-swatch" style="background:#AE43CE"></div>
-        <span>Suffolk County — underfunded</span>
-      </div>
-      <div class="li-legend-item">
-        <div class="li-legend-swatch hollow" style="border-color:#6B2680"></div>
-        <span>Nassau County — receiving more than updated formula</span>
-      </div>
-      <div class="li-legend-item">
-        <div class="li-legend-swatch hollow" style="border-color:#AE43CE"></div>
-        <span>Suffolk County — receiving more than updated formula</span>
+        <div class="li-legend-swatch" style="background:#C87AE0"></div>
+        <span>Suffolk County</span>
       </div>
     </div>
 
@@ -684,63 +676,116 @@ function drawLIChart() {
   const vals = liDistricts.map(d => d[field] || 0);
   const maxAbs = Math.max(Math.abs(d3.min(vals)), Math.abs(d3.max(vals)));
 
-  const marginLeft = 185, marginRight = 20, marginTop = 62, marginBottom = 10;
+  // Nassau = dark purple, Suffolk = light/lavender purple (clearly distinct)
+  const NASSAU_COLOR  = '#57146D';
+  const SUFFOLK_COLOR = '#C87AE0';
+
+  const marginLeft = 10;
+  const marginRight = 10;
+  const marginTop = 62;
+  const marginBottom = 10;
   const rowH = 14;
   const H = liDistricts.length * rowH + marginTop + marginBottom;
-  const W = Math.max(700, 900);
-  const chartW = W - marginLeft - marginRight;
-  const PURPLE = '#6B2680', LIGHT_PURPLE = '#AE43CE';
+  const W = 900;
 
   const svg = d3.select('#li-chart')
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('height', H);
   svg.selectAll('*').remove();
 
-  const xScale = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([marginLeft, W - marginRight]);
+  const xScale = d3.scaleLinear()
+    .domain([-maxAbs, maxAbs])
+    .range([marginLeft, W - marginRight]);
 
-  svg.append('text').attr('x', xScale(-maxAbs * 0.5)).attr('y', 16)
+  // Direction labels at top
+  svg.append('text')
+    .attr('x', xScale(-maxAbs * 0.5)).attr('y', 16)
     .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', '#666')
     .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
     .text('← Currently receiving more than updated formula');
-  svg.append('text').attr('x', xScale(maxAbs * 0.5)).attr('y', 16)
-    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', PURPLE)
+  svg.append('text')
+    .attr('x', xScale(maxAbs * 0.5)).attr('y', 16)
+    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', NASSAU_COLOR)
     .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
     .text('Underfunded relative to updated formula →');
 
+  // Tick gridlines + labels
   const ticks = d3.range(-maxAbs, maxAbs * 1.01, maxAbs * 2 / 5);
-  const g = svg.append('g');
+  const g = svg.append('g').attr('class', 'axis');
   for (const t of ticks) {
     const x = xScale(t);
-    g.append('line').attr('x1', x).attr('y1', marginTop - 6).attr('x2', x).attr('y2', H - marginBottom).attr('stroke', '#e0e0e0').attr('stroke-width', 1);
-    g.append('text').attr('x', x).attr('y', marginTop - 10).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#949494')
+    g.append('line')
+      .attr('x1', x).attr('y1', marginTop - 6)
+      .attr('x2', x).attr('y2', H - marginBottom)
+      .attr('stroke', '#e0e0e0').attr('stroke-width', 1);
+    g.append('text')
+      .attr('x', x).attr('y', marginTop - 10)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 11).attr('fill', '#949494')
       .attr('font-family', "'Source Sans 3', sans-serif")
-      .text(liMetric === 'pp' ? (t === 0 ? '$0' : (t > 0 ? '+' : '') + '$' + Math.abs(Math.round(t/1000)) + 'K') : (t === 0 ? '0%' : (t > 0 ? '+' : '') + Math.abs(Math.round(t)) + '%'));
+      .text(liMetric === 'pp'
+        ? (t === 0 ? '$0' : (t > 0 ? '+' : '') + '$' + Math.abs(Math.round(t/1000)) + 'K')
+        : (t === 0 ? '0%' : (t > 0 ? '+' : '') + Math.abs(Math.round(t)) + '%'));
   }
-  svg.append('line').attr('x1', xScale(0)).attr('y1', marginTop - 6).attr('x2', xScale(0)).attr('y2', H - marginBottom).attr('stroke', '#3D3630').attr('stroke-width', 1.5);
 
+  // Zero line — prominent
+  svg.append('line')
+    .attr('x1', xScale(0)).attr('y1', marginTop - 6)
+    .attr('x2', xScale(0)).attr('y2', H - marginBottom)
+    .attr('stroke', '#1a1a1a').attr('stroke-width', 2.5);
+
+  // Bars — one <g> per district for search highlighting
   const barsG = svg.append('g');
+
   liDistricts.forEach((d, i) => {
     const val = d[field] || 0;
     const y = marginTop + i * rowH;
-    const x0 = xScale(0), x1 = xScale(val);
+    const x0 = xScale(0);
+    const x1 = xScale(val);
     const barW = Math.abs(x1 - x0);
     const barX = val >= 0 ? x0 : x0 - barW;
     const isPositive = val >= 0;
-    const countyColor = d.county === 'Nassau' ? PURPLE : LIGHT_PURPLE;
-    const distG = barsG.append('g').attr('data-district', d.district.toLowerCase());
-    const barRect = distG.append('rect').attr('x', barX).attr('y', y + 1).attr('width', Math.max(barW, 2)).attr('height', rowH - 2).attr('rx', 1);
-    if (isPositive) { barRect.attr('fill', countyColor).attr('opacity', 0.85); }
-    else { barRect.attr('fill', 'none').attr('stroke', countyColor).attr('stroke-width', 1.5).attr('opacity', 0.9); }
-    const shortName = d.district.replace(/ UNION FREE SD$/i,'').replace(/ CENTRAL SD$/i,'').replace(/ CITY SD$/i,'').replace(/ UFSD$/i,'').replace(/ CSD$/i,'');
-    distG.append('text').attr('x', marginLeft - 4).attr('y', y + rowH - 3).attr('text-anchor', 'end').attr('font-size', 9.5).attr('fill', countyColor).attr('font-family', "'Source Sans 3', sans-serif").text(shortName);
-    distG.append('rect').attr('x', 0).attr('y', y).attr('width', W).attr('height', rowH).attr('fill', 'transparent')
+    const countyColor = d.county === 'Nassau' ? NASSAU_COLOR : SUFFOLK_COLOR;
+
+    const distG = barsG.append('g')
+      .attr('data-district', d.district.toLowerCase());
+
+    // All bars filled with county color
+    distG.append('rect')
+      .attr('x', barX).attr('y', y + 1)
+      .attr('width', Math.max(barW, 2)).attr('height', rowH - 2)
+      .attr('fill', countyColor).attr('opacity', 0.85).attr('rx', 1);
+
+    // District name next to the bar tip
+    const shortName = d.district
+      .replace(/ UNION FREE SD$/i, '').replace(/ CENTRAL SD$/i, '')
+      .replace(/ CITY SD$/i, '').replace(/ UFSD$/i, '').replace(/ CSD$/i, '');
+    const labelX = isPositive ? x1 + 3 : barX - 3;
+    const anchor  = isPositive ? 'start' : 'end';
+    distG.append('text')
+      .attr('x', labelX).attr('y', y + rowH - 3)
+      .attr('text-anchor', anchor)
+      .attr('font-size', 9).attr('fill', countyColor)
+      .attr('font-family', "'Source Sans 3', sans-serif")
+      .text(shortName);
+
+    // Transparent hover overlay for tooltip
+    distG.append('rect')
+      .attr('x', 0).attr('y', y)
+      .attr('width', W).attr('height', rowH)
+      .attr('fill', 'transparent')
       .on('mousemove', function(event) {
-        const valStr = liMetric === 'pp' ? fmt.dollar(d[field]) : fmt.pct(d[field]);
+        const val = d[field];
+        const valStr = liMetric === 'pp' ? fmt.dollar(val) : fmt.pct(val);
         const tip = document.getElementById('map-tooltip');
         tip.innerHTML = `<strong>${d.district}</strong>${d.county} County<br>${liMetric==='pp'?'Per-Pupil Gap':'% of Revenue'}: ${valStr}<br>Students of Color: ${fmt.pct(d.pct_poc)}<br>Enrollment: ${fmt.num(d.enrollment)}`;
-        tip.style.opacity = '1'; tip.style.left = (event.clientX + 14) + 'px'; tip.style.top = (event.clientY - 10) + 'px';
+        tip.style.opacity = '1';
+        tip.style.left = (event.clientX + 14) + 'px';
+        tip.style.top  = (event.clientY - 10) + 'px';
       })
-      .on('mouseleave', () => { document.getElementById('map-tooltip').style.opacity = '0'; });
+      .on('mouseleave', function() {
+        document.getElementById('map-tooltip').style.opacity = '0';
+      });
   });
   const searchEl = document.getElementById('li-search');
   if (searchEl && searchEl.value.trim()) liChartSearch(searchEl.value);
