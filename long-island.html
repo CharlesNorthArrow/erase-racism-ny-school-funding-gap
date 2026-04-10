@@ -186,7 +186,7 @@
     .li-legend-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
     .li-legend-swatch.hollow { background: none; border: 2px solid var(--purple-dark); }
     .li-search-wrap { margin-bottom: 10px; }
-    #li-search { padding: 7px 12px; border: 1px solid var(--gray-light); border-radius: 6px; font-family: var(--font-sans); font-size: 13px; color: var(--brown-text); width: 260px; max-width: 100%; outline: none; }
+    #li-search { padding: 7px 12px; border: 1px solid var(--gray-light); border-radius: 6px; font-family: var(--font-sans); font-size: 13px; color: var(--brown-text); min-width: 260px; max-width: 100%; outline: none; background: var(--white); cursor: pointer; }
     #li-search:focus { border-color: var(--purple-accent); }
     #li-q4-section { margin-top: 48px; }
     #li-q4-chart { width: 100%; display: block; }
@@ -326,7 +326,9 @@
     </div>
 
     <div class="li-search-wrap">
-      <input type="text" id="li-search" placeholder="Search for a district to highlight…" oninput="liChartSearch(this.value)" aria-label="Search Long Island districts">
+      <select id="li-search" onchange="liChartSearch(this.value)" aria-label="Highlight a Long Island district">
+        <option value="">— Highlight a district —</option>
+      </select>
     </div>
 
     <div id="li-chart-container">
@@ -661,10 +663,17 @@ function liChartSearch(query) {
   const q = query.trim().toLowerCase();
   const svgEl = document.getElementById('li-chart');
   const groups = svgEl.querySelectorAll('g[data-district]');
-  if (!q) { groups.forEach(g => g.setAttribute('opacity', 1)); return; }
   groups.forEach(g => {
-    const name = g.getAttribute('data-district') || '';
-    g.setAttribute('opacity', name.includes(q) ? 1 : 0.1);
+    const bar = g.querySelector('rect');
+    if (bar) bar.setAttribute('fill', g.getAttribute('data-county-color') || '#6B2680');
+    g.setAttribute('opacity', 1);
+  });
+  if (!q) return;
+  groups.forEach(g => {
+    if (g.getAttribute('data-district') === q) {
+      const bar = g.querySelector('rect');
+      if (bar) bar.setAttribute('fill', '#E87000');
+    }
   });
 }
 
@@ -748,7 +757,8 @@ function drawLIChart() {
     const countyColor = d.county === 'Nassau' ? NASSAU_COLOR : SUFFOLK_COLOR;
 
     const distG = barsG.append('g')
-      .attr('data-district', d.district.toLowerCase());
+      .attr('data-district', d.district.toLowerCase())
+      .attr('data-county-color', countyColor);
 
     // All bars filled with county color
     distG.append('rect')
@@ -787,8 +797,21 @@ function drawLIChart() {
         document.getElementById('map-tooltip').style.opacity = '0';
       });
   });
+  // Populate district picklist (preserve current selection)
   const searchEl = document.getElementById('li-search');
-  if (searchEl && searchEl.value.trim()) liChartSearch(searchEl.value);
+  if (searchEl) {
+    const prev = searchEl.value;
+    searchEl.innerHTML = '<option value="">— Highlight a district —</option>';
+    liDistricts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.district.toLowerCase();
+      const shortName = d.district.replace(/ UNION FREE SD$/i,'').replace(/ CENTRAL SD$/i,'').replace(/ CITY SD$/i,'').replace(/ UFSD$/i,'').replace(/ CSD$/i,'');
+      opt.textContent = shortName + ' (' + d.county + ')';
+      searchEl.appendChild(opt);
+    });
+    searchEl.value = prev;
+    if (prev) liChartSearch(prev);
+  }
 }
 
 /* ── LI Callout ──────────────────────────────────────────────────────────── */
