@@ -1556,7 +1556,7 @@ function drawLIChart() {
   if (searchEl) {
     const prev = searchEl.value;
     searchEl.innerHTML = '<option value="">— Highlight a district —</option>';
-    liDistricts.forEach(d => {
+    [...liDistricts].sort((a, b) => a.district.localeCompare(b.district)).forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.district.toLowerCase();
       const shortName = d.district.replace(/ UNION FREE SD$/i,'').replace(/ CENTRAL SD$/i,'').replace(/ CITY SD$/i,'').replace(/ UFSD$/i,'').replace(/ CSD$/i,'');
