@@ -185,6 +185,9 @@
     .li-legend-item { display: flex; align-items: center; gap: 6px; }
     .li-legend-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
     .li-legend-swatch.hollow { background: none; border: 2px solid var(--purple-dark); }
+    .li-legend-gradient { width: 80px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+    .li-controls-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .li-controls-row .toggle-group { margin-bottom: 0; }
     .li-search-wrap { margin-bottom: 10px; }
     #li-search { padding: 7px 12px; border: 1px solid var(--gray-light); border-radius: 6px; font-family: var(--font-sans); font-size: 13px; color: var(--brown-text); min-width: 260px; max-width: 100%; outline: none; background: var(--white); cursor: pointer; }
     #li-search:focus { border-color: var(--purple-accent); }
@@ -309,19 +312,26 @@
 
     <div class="li-intro" id="li-intro"></div>
 
-    <div class="toggle-group" role="group" aria-label="Long Island chart metric">
-      <button class="active" id="li-toggle-pp" onclick="setLIMetric('pp')">Per-Pupil Gap ($)</button>
-      <button id="li-toggle-pct" onclick="setLIMetric('pct')">% of Revenue</button>
+    <div class="li-controls-row">
+      <div class="toggle-group" role="group" aria-label="Long Island chart metric">
+        <button class="active" id="li-toggle-pp" onclick="setLIMetric('pp')">Per-Pupil Gap ($)</button>
+        <button id="li-toggle-pct" onclick="setLIMetric('pct')">% of Revenue</button>
+      </div>
+      <div class="toggle-group" role="group" aria-label="County filter">
+        <button class="active" id="li-county-all" onclick="setLICountyFilter('all')">All districts</button>
+        <button id="li-county-nassau" onclick="setLICountyFilter('nassau')">Nassau only</button>
+        <button id="li-county-suffolk" onclick="setLICountyFilter('suffolk')">Suffolk only</button>
+      </div>
     </div>
 
     <div class="li-legend">
       <div class="li-legend-item">
-        <div class="li-legend-swatch" style="background:#57146D"></div>
-        <span>Nassau County</span>
+        <div class="li-legend-gradient" style="background: linear-gradient(to right, #FFD4A0, #B83A00)"></div>
+        <span>Funding gap (larger = darker)</span>
       </div>
       <div class="li-legend-item">
-        <div class="li-legend-swatch" style="background:#C87AE0"></div>
-        <span>Suffolk County</span>
+        <div class="li-legend-gradient" style="background: linear-gradient(to right, #B8E6C0, #1B5E20)"></div>
+        <span>Funding surplus (larger = darker)</span>
       </div>
     </div>
 
@@ -651,11 +661,20 @@ function renderLIIntro() {
 
 /* ── LI Diverging Bar Chart ──────────────────────────────────────────────── */
 let liMetric = 'pp';
+let liCountyFilter = 'all';
 
 function setLIMetric(metric) {
   liMetric = metric;
   document.getElementById('li-toggle-pp').classList.toggle('active', metric==='pp');
   document.getElementById('li-toggle-pct').classList.toggle('active', metric==='pct');
+  drawLIChart();
+}
+
+function setLICountyFilter(filter) {
+  liCountyFilter = filter;
+  document.getElementById('li-county-all').classList.toggle('active', filter === 'all');
+  document.getElementById('li-county-nassau').classList.toggle('active', filter === 'nassau');
+  document.getElementById('li-county-suffolk').classList.toggle('active', filter === 'suffolk');
   drawLIChart();
 }
 
@@ -672,26 +691,31 @@ function liChartSearch(query) {
   groups.forEach(g => {
     if (g.getAttribute('data-district') === q) {
       const bar = g.querySelector('rect');
-      if (bar) bar.setAttribute('fill', '#E87000');
+      if (bar) bar.setAttribute('fill', '#6B2680');
     }
   });
 }
 
 function drawLIChart() {
   const liDistricts = RECORDS
+    .filter(r => liCountyFilter === 'all' || r.county.toLowerCase() === liCountyFilter)
     .sort((a, b) => (b[liMetric === 'pp' ? 'gap_pp' : 'gap_pct'] || 0) - (a[liMetric === 'pp' ? 'gap_pp' : 'gap_pct'] || 0));
 
   const field = liMetric === 'pp' ? 'gap_pp' : 'gap_pct';
   const vals = liDistricts.map(d => d[field] || 0);
   const maxAbs = Math.max(Math.abs(d3.min(vals)), Math.abs(d3.max(vals)));
 
-  // Nassau = dark purple, Suffolk = light/lavender purple (clearly distinct)
-  const NASSAU_COLOR  = '#57146D';
-  const SUFFOLK_COLOR = '#C87AE0';
+  // Gradient color scales by gap direction
+  const posVals = vals.filter(v => v > 0);
+  const negVals = vals.filter(v => v < 0);
+  const maxPos    = posVals.length ? d3.max(posVals)           : 1;
+  const maxNegAbs = negVals.length ? Math.abs(d3.min(negVals)) : 1;
+  const posColorScale = d3.scaleLinear().domain([0, maxPos])    .range(['#FFD4A0', '#B83A00']);
+  const negColorScale = d3.scaleLinear().domain([0, maxNegAbs]) .range(['#B8E6C0', '#1B5E20']);
 
   const marginLeft = 10;
   const marginRight = 10;
-  const marginTop = 62;
+  const marginTop = 72;
   const marginBottom = 10;
   const rowH = 14;
   const H = liDistricts.length * rowH + marginTop + marginBottom;
@@ -706,15 +730,28 @@ function drawLIChart() {
     .domain([-maxAbs, maxAbs])
     .range([marginLeft, W - marginRight]);
 
-  // Direction labels at top
+  // Direction labels at top — two lines each side
   svg.append('text')
-    .attr('x', xScale(-maxAbs * 0.5)).attr('y', 16)
-    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', '#666')
+    .attr('x', xScale(-maxAbs * 0.5)).attr('y', 14)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#1B5E20')
+    .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '700')
+    .attr('letter-spacing', '0.1em')
+    .text('FUNDING SURPLUS');
+  svg.append('text')
+    .attr('x', xScale(-maxAbs * 0.5)).attr('y', 30)
+    .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#1B5E20')
     .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
     .text('← Currently receiving more than updated formula');
+
   svg.append('text')
-    .attr('x', xScale(maxAbs * 0.5)).attr('y', 16)
-    .attr('text-anchor', 'middle').attr('font-size', 13).attr('fill', NASSAU_COLOR)
+    .attr('x', xScale(maxAbs * 0.5)).attr('y', 14)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#B83A00')
+    .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '700')
+    .attr('letter-spacing', '0.1em')
+    .text('FUNDING GAP');
+  svg.append('text')
+    .attr('x', xScale(maxAbs * 0.5)).attr('y', 30)
+    .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#B83A00')
     .attr('font-family', "'Source Sans 3', sans-serif").attr('font-weight', '600')
     .text('Underfunded relative to updated formula →');
 
@@ -754,17 +791,17 @@ function drawLIChart() {
     const barW = Math.abs(x1 - x0);
     const barX = val >= 0 ? x0 : x0 - barW;
     const isPositive = val >= 0;
-    const countyColor = d.county === 'Nassau' ? NASSAU_COLOR : SUFFOLK_COLOR;
+    const barColor = val >= 0 ? posColorScale(val) : negColorScale(Math.abs(val));
 
     const distG = barsG.append('g')
       .attr('data-district', d.district.toLowerCase())
-      .attr('data-county-color', countyColor);
+      .attr('data-county-color', barColor);
 
-    // All bars filled with county color
+    // Bar filled with gradient color
     distG.append('rect')
       .attr('x', barX).attr('y', y + 1)
       .attr('width', Math.max(barW, 2)).attr('height', rowH - 2)
-      .attr('fill', countyColor).attr('opacity', 0.85).attr('rx', 1);
+      .attr('fill', barColor).attr('opacity', 0.9).attr('rx', 1);
 
     // District name next to the bar tip
     const shortName = d.district
@@ -775,7 +812,7 @@ function drawLIChart() {
     distG.append('text')
       .attr('x', labelX).attr('y', y + rowH - 3)
       .attr('text-anchor', anchor)
-      .attr('font-size', 9).attr('fill', countyColor)
+      .attr('font-size', 9).attr('fill', barColor)
       .attr('font-family', "'Source Sans 3', sans-serif")
       .text(shortName);
 
