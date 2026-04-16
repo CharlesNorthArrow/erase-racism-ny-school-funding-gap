@@ -1595,7 +1595,7 @@ function renderLICallout() {
   const botPOCpct = botPOC.length ? botPOC.reduce((s,r)=>s+r.pct_poc,0)/botPOC.length : null;
 
   callout.innerHTML = `
-    The districts facing the largest funding gaps — including <strong>${top3Names}</strong> — are communities where the need is highest and the resources are thinnest.
+    When viewing the visualization with the All Districts button selected, you will see that the districts facing the largest funding gaps — including <strong>${top3Names}</strong> — are communities where the need is highest and the resources are thinnest.
     Their average Combined Wealth Ratio is just <strong>${avgCWR != null ? avgCWR.toFixed(2)+'x' : 'N/A'}</strong>,
     well below the state standard of 1.0x, and only <strong>${avgELApct != null ? Math.round(avgELApct)+'%' : 'N/A'}</strong>
     of their students are proficient on grades 3–8 ELA assessments.
