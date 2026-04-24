@@ -721,7 +721,7 @@
 <section id="li-section" class="section section-alt" aria-labelledby="li-title">
   <div class="container">
     <h2 class="section-title" id="li-title">Long Island: Extreme Inequity in Plain Sight</h2>
-    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $6.9 billion — $2.7 billion in Nassau and $4.2 billion in Suffolk. Both counties currently receive far less than the updated formula would entitle them to, at 186% and 193% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of upwards of $40,000 while others are currently receiving more money than the updated formula would allow.</p>
+    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $6.9 billion — $2.7 billion in Nassau and $4.2 billion in Suffolk. Both counties currently receive far less than the updated formula would entitle them to, at 186% and 193% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of upwards of $40,000.</p>
 
     <div class="li-intro" id="li-intro"></div>
 
@@ -1595,17 +1595,13 @@ function renderLICallout() {
 
   callout.innerHTML = `
     When viewing the visualization with the All Districts button selected, you will see that the districts facing the largest funding gaps — including <strong>${top3Names}</strong> — are communities where the need is highest and the resources are thinnest.
-    Their average Combined Wealth Ratio is just <strong>${avgCWR != null ? avgCWR.toFixed(2)+'x' : 'N/A'}</strong>,
-    well below the state standard of 1.0x, and only <strong>${avgELApct != null ? Math.round(avgELApct)+'%' : 'N/A'}</strong>
-    of their students are proficient on grades 3–8 ELA assessments.
+    Only <strong>${avgELApct != null ? Math.round(avgELApct)+'%' : 'N/A'}</strong> of these districts' students are proficient on grades 3–8 ELA assessments.
     These are also the districts where students of color are concentrated — averaging
     <strong>${avgPOCpct != null ? Math.round(avgPOCpct)+'%' : 'N/A'}</strong> students of color —
     a direct consequence of Long Island's long history of structural racism in education, including
     decades of exclusionary zoning, redlining, and school district boundary-drawing that continue
     to produce a separate and unequal school system today.
-    Meanwhile, districts such as <strong>${bot3Names}</strong> — which serve far fewer students of color
-    (averaging ${botPOCpct != null ? Math.round(botPOCpct) : 'N/A'}%) —
-    benefit disproportionately from the current, out-of-date formula.
+    The wealth ratios for these communities are well below the state average — which means these districts have limited local tax capacity to compensate for the state shortfall.
   `.trim().replace(/\n\s+/g, ' ');
 }
 
