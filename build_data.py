@@ -30,6 +30,7 @@ COLUMNS = {
     "district":     "ENTITY_NAME",
     "cwr":          "I(WM0182) 05 COMBINED WEALTH RATIO (CWR) FOR 25-26 AID",
     "current_fa":   "W(FA0001) 00 TOTAL FOUNDATION AID",
+    "wwr_num":      "Weighted_Wealth_Ratio_Numerator",
 }
 # gap_pp is derived: CALC_Gap_Total / J(PC0257) enrollment (per user spec)
 
@@ -110,6 +111,7 @@ with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
         pct_prof   = clean_num(row.get(COLUMNS["pct_prof"]))
         cwr        = clean_num(row.get(COLUMNS["cwr"]))
         current_fa = clean_num(row.get(COLUMNS["current_fa"]))
+        wwr_num    = clean_num(row.get(COLUMNS["wwr_num"]))
 
         district = title_district(clean_str(row.get(COLUMNS["district"])))
         county   = normalize_county(row.get(COLUMNS["county"]))
@@ -128,6 +130,7 @@ with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
             "pct_prof":   pct_prof,
             "cwr":        round(cwr, 3)        if cwr       is not None else None,
             "current_fa": round(current_fa, 2) if current_fa is not None else None,
+            "wwr_num":    round(wwr_num, 4)    if wwr_num   is not None else None,
         })
 
 print(f"Processed {len(records)} districts")

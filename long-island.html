@@ -40,6 +40,11 @@
     .section-alt { background: var(--bg-light); }
     .section-title { font-size: 28px; color: var(--purple-dark); margin-bottom: 10px; }
     .section-sub { font-size: 16px; color: var(--gray-mid); margin-bottom: 32px; line-height: 1.6; }
+    /* ── May 2026 revision notice ─────────────────── */
+    .revision-notice { background: #FFF6DC; border-left: 4px solid #C99100; border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 22px; margin: 32px 0 0; font-size: 14px; line-height: 1.6; color: var(--brown-text); }
+    .revision-notice strong { color: #6B4D00; }
+    .revision-notice a { color: var(--purple-dark); font-weight: 600; }
+    .revision-notice a:hover { text-decoration: underline; }
 
     /* ── Header ─────────────────────────────────── */
     header {
@@ -243,7 +248,7 @@
   <div class="container">
     <div class="hero-eyebrow">Long Island Deep Dive</div>
     <h1 class="hero-title">Nassau &amp; Suffolk County School Funding Gaps</h1>
-    <p class="hero-sub">Nassau and Suffolk counties are home to some of the most dramatic school funding inequities in New York State — with some districts facing per-pupil gaps of over $40,000 while neighboring districts receive more than the updated formula would provide.</p>
+    <p class="hero-sub">Nassau and Suffolk counties are home to some of the most dramatic school funding inequities in New York State — with some districts facing per-pupil gaps of over $30,000 while neighboring districts receive more than the updated formula would provide.</p>
     <div class="hero-stats">
       <div class="hero-stat">
         <div class="h-val" id="li-hero-gap-total">—</div>
@@ -261,6 +266,15 @@
         <div class="h-val" id="li-hero-enrollment">—</div>
         <div class="h-lbl">Students Enrolled</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MAY 2026 REVISION NOTICE ═══════════════════════════════════════════ -->
+<section aria-label="Methodological revision notice">
+  <div class="container">
+    <div class="revision-notice">
+      <strong>May 2026 Revision:</strong> This report was revised in May 2026 following an expert methodological review of the original analysis. The revision corrects an error in how the inflation adjustment (Update 1) was originally calculated, in which the inflation figures (2.8% and 3.45%) were applied as multipliers rather than as percentages. The corrected calculation reduces the statewide funding gap estimate from $77.4 billion to approximately $51 billion. For full detail on the revisions, see the <a href="https://docs.google.com/document/d/1GXv6V8UWyCyw_bQP9qr9tyerwTqIySNX9qSRNmiHgUw/edit?usp=sharing" target="_blank" rel="noopener">Methodology document ↗</a>.
     </div>
   </div>
 </section>
@@ -308,7 +322,7 @@
 <section id="li-chart-section" class="section" aria-labelledby="li-chart-title">
   <div class="container">
     <h2 class="section-title" id="li-chart-title">Long Island: Extreme Inequity in Plain Sight</h2>
-    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $6.9 billion — $2.7 billion in Nassau and $4.2 billion in Suffolk. Both counties currently receive far less than the updated formula would entitle them to, at 186% and 193% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of upwards of $40,000.</p>
+    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $4.2 billion — $1.5 billion in Nassau and $2.6 billion in Suffolk. Both counties currently receive less than the updated formula would entitle them to, at 107% and 120% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of over $30,000.</p>
 
     <div class="li-intro" id="li-intro"></div>
 
@@ -412,6 +426,12 @@ function buildCountyData(records) {
       const vals = recs.map(r => r[field]).filter(v => v != null);
       return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
     };
+    // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator
+    const cwrWeighted = () => {
+      let num = 0, den = 0;
+      for (const r of recs) { if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; } }
+      return den > 0 ? num / den : null;
+    };
     const totalGap = recs.reduce((s,r) => s + (r.gap_total||0), 0);
     const totalFA  = recs.reduce((s,r) => s + (r.current_fa||0), 0);
     const quartileCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
@@ -422,7 +442,7 @@ function buildCountyData(records) {
       gap_pp:   totalEnroll > 0 ? totalGap / totalEnroll : null,
       gap_pct:  totalFA     > 0 ? (totalGap / totalFA) * 100 : null,
       pct_poc:  wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'),
-      pct_prof: wAvg('pct_prof'), cwr: avg('cwr'), current_fa: totalFA,
+      pct_prof: wAvg('pct_prof'), cwr: cwrWeighted(), current_fa: totalFA,
       quartile_counts: quartileCounts,
     };
   }
@@ -439,13 +459,19 @@ function buildLIAvg(records) {
     for (const r of records) { if (r[field] != null && r.enrollment) { num += r[field]*r.enrollment; den += r.enrollment; } }
     return den > 0 ? num/den : null;
   };
+  // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator
+  const cwrWeighted = () => {
+    let num = 0, den = 0;
+    for (const r of records) { if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; } }
+    return den > 0 ? num / den : null;
+  };
   return {
     district: 'Long Island Average',
     enrollment: totalEnroll, gap_total: totalGap,
     gap_pp:   totalEnroll > 0 ? totalGap / totalEnroll : null,
     gap_pct:  totalFA     > 0 ? (totalGap / totalFA) * 100 : null,
     pct_poc: wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'),
-    pct_prof: wAvg('pct_prof'), cwr: wAvg('cwr'),
+    pct_prof: wAvg('pct_prof'), cwr: cwrWeighted(),
   };
 }
 
@@ -462,13 +488,19 @@ function buildQuartileData(records) {
       return den>0?num/den:null;
     };
     const sAvg = (field) => { const v = recs.map(r=>r[field]).filter(v=>v!=null); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+    // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator
+    const cwrWeighted = () => {
+      let num=0, den=0;
+      for (const r of recs) { if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; } }
+      return den > 0 ? num / den : null;
+    };
     const totalGap = recs.reduce((s,r)=>s+(r.gap_total||0),0);
     const totalFA  = recs.reduce((s,r)=>s+(r.current_fa||0),0);
     out[q] = {
       quartile: q, num_districts: recs.length, enrollment: totalEnroll, gap_total: totalGap,
       gap_pp:   totalEnroll > 0 ? totalGap / totalEnroll : null,
       gap_pct:  totalFA     > 0 ? (totalGap / totalFA) * 100 : null,
-      pct_poc: wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'), pct_prof: wAvg('pct_prof'), cwr: sAvg('cwr'),
+      pct_poc: wAvg('pct_poc'), pct_ecdis: wAvg('pct_ecdis'), pct_prof: wAvg('pct_prof'), cwr: cwrWeighted(),
     };
   }
   return out;
@@ -859,7 +891,10 @@ function renderLICallout() {
   const shortName = d => d.district.replace(/ (UNION FREE SD|CENTRAL SD|CITY SD|UFSD|CSD|COMMON SD)$/i,'');
   const top3Names = sorted.slice(0,3).map(shortName).join(', ');
   const topQ = sorted.slice(0, Math.ceil(sorted.length/4));
-  const avgCWR = topQ.reduce((s,r)=>s+(r.cwr||0),0)/topQ.filter(r=>r.cwr!=null).length;
+  // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator
+  const _cwrNum = topQ.reduce((s,r) => s + ((r.wwr_num != null && r.enrollment) ? r.wwr_num : 0), 0);
+  const _cwrDen = topQ.reduce((s,r) => s + ((r.wwr_num != null && r.enrollment) ? r.enrollment : 0), 0);
+  const avgCWR = _cwrDen > 0 ? _cwrNum / _cwrDen : null;
   const avgELA = topQ.filter(r=>r.pct_prof!=null);
   const avgELApct = avgELA.length ? avgELA.reduce((s,r)=>s+r.pct_prof,0)/avgELA.length : null;
   const avgPOC = topQ.filter(r=>r.pct_poc!=null);
@@ -886,8 +921,14 @@ function drawLIQ4Chart() {
     const enr = recs.reduce((s,r) => s + (r.enrollment||0), 0);
     return enr > 0 ? tot / enr : null;
   };
-  const liAvg = { pct_poc: wPool(liAll,'pct_poc'), pct_ecdis: wPool(liAll,'pct_ecdis'), pct_prof: wPool(liAll,'pct_prof'), cwr: wPool(liAll,'cwr'), gap_pp: gapPool(liAll) };
-  const q4Avg = { pct_poc: wPool(liQ4,'pct_poc'), pct_ecdis: wPool(liQ4,'pct_ecdis'), pct_prof: wPool(liQ4,'pct_prof'), cwr: wPool(liQ4,'cwr'), gap_pp: gapPool(liQ4) };
+  // CWR pool using Weighted_Wealth_Ratio_Numerator
+  const cwrPool = recs => {
+    let num=0, den=0;
+    for (const r of recs) { if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; } }
+    return den > 0 ? num / den : null;
+  };
+  const liAvg = { pct_poc: wPool(liAll,'pct_poc'), pct_ecdis: wPool(liAll,'pct_ecdis'), pct_prof: wPool(liAll,'pct_prof'), cwr: cwrPool(liAll), gap_pp: gapPool(liAll) };
+  const q4Avg = { pct_poc: wPool(liQ4,'pct_poc'), pct_ecdis: wPool(liQ4,'pct_ecdis'), pct_prof: wPool(liQ4,'pct_prof'), cwr: cwrPool(liQ4), gap_pp: gapPool(liQ4) };
   const metrics = [
     { key: 'pct_poc',   label: '% Students of Color',         fmt: v => v.toFixed(1)+'%' },
     { key: 'pct_ecdis', label: '% Economically Disadvantaged', fmt: v => v.toFixed(1)+'%' },

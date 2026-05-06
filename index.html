@@ -6,20 +6,20 @@
   <title>New York School Funding Gap | ERASE Racism</title>
 
   <!-- SEO & Social -->
-  <meta name="description" content="An interactive analysis of New York State's $77 billion school funding gap — explore funding inequities by district, county, and quartile, with a deep dive into Long Island." />
+  <meta name="description" content="An interactive analysis of New York State's $51 billion school funding gap — explore funding inequities by district, county, and quartile, with a deep dive into Long Island." />
   <meta name="author" content="ERASE Racism" />
   <meta name="keywords" content="school funding gap, New York, Foundation Aid, ERASE Racism, education equity, racial equity, Long Island schools" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="New York's $77 Billion School Funding Gap | ERASE Racism" />
+  <meta property="og:title" content="New York's $51 Billion School Funding Gap | ERASE Racism" />
   <meta property="og:description" content="Explore how New York State's Foundation Aid formula fails the students who need it most — an interactive data visualization by ERASE Racism." />
   <meta property="og:image" content="logo.png" />
   <meta property="og:site_name" content="ERASE Racism" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="New York's $77 Billion School Funding Gap | ERASE Racism" />
+  <meta name="twitter:title" content="New York's $51 Billion School Funding Gap | ERASE Racism" />
   <meta name="twitter:description" content="Explore how New York State's Foundation Aid formula fails the students who need it most — an interactive data visualization by ERASE Racism." />
   <meta name="twitter:image" content="logo.png" />
 
@@ -157,6 +157,21 @@
     /* ── Section titles ───────────────────────────── */
     .section-title { font-size: clamp(22px, 3vw, 32px); margin-bottom: 10px; }
     .section-sub { color: var(--gray-mid); font-size: 16px; margin-bottom: 36px; line-height: 1.5; }
+
+    /* ── May 2026 revision notice ─────────────────── */
+    .revision-notice {
+      background: #FFF6DC;
+      border-left: 4px solid #C99100;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 16px 22px;
+      margin: 32px 0 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--brown-text);
+    }
+    .revision-notice strong { color: #6B4D00; }
+    .revision-notice a { color: var(--purple-dark); font-weight: 600; }
+    .revision-notice a:hover { text-decoration: underline; }
 
     /* ── Toggle buttons ───────────────────────────── */
     .toggle-group {
@@ -616,7 +631,7 @@
 <!-- ══ HERO ════════════════════════════════════════════════════════════════ -->
 <section class="hero" aria-labelledby="hero-title">
   <div class="container">
-    <h1 id="hero-title">New York's $77 Billion School Funding Gap</h1>
+    <h1 id="hero-title">New York's $51 Billion School Funding Gap</h1>
     <p>New York State's Foundation Aid formula is failing the students who need it most. This analysis quantifies how much districts would receive under an updated formula — and how wide the gap has grown.</p>
     <div class="hero-stats">
       <div class="hero-stat">
@@ -635,11 +650,20 @@
   </div>
 </section>
 
+<!-- ══ MAY 2026 REVISION NOTICE ═══════════════════════════════════════════ -->
+<section aria-label="Methodological revision notice">
+  <div class="container">
+    <div class="revision-notice">
+      <strong>May 2026 Revision:</strong> This report was revised in May 2026 following an expert methodological review of the original analysis. The revision corrects an error in how the inflation adjustment (Update 1) was originally calculated, in which the inflation figures (2.8% and 3.45%) were applied as multipliers rather than as percentages. The corrected calculation reduces the statewide funding gap estimate from $77.4 billion to approximately $51 billion. For full detail on the revisions, see the <a href="https://docs.google.com/document/d/1GXv6V8UWyCyw_bQP9qr9tyerwTqIySNX9qSRNmiHgUw/edit?usp=sharing" target="_blank" rel="noopener">Methodology document ↗</a>.
+    </div>
+  </div>
+</section>
+
 <!-- ══ FEATURE 3: QUARTILE ANALYSIS ═══════════════════════════════════════ -->
 <section id="quartile-section" class="section" aria-labelledby="quartile-title">
   <div class="container">
     <h2 class="section-title" id="quartile-title">Analysis by Per-Pupil Funding Gap Quartiles</h2>
-    <p class="section-sub">Districts are grouped into four quartiles based on per-pupil funding gap. Q4 districts — those with the largest gaps — serve 56% of all students and account for 85% of the statewide shortfall.</p>
+    <p class="section-sub">Districts are grouped into four quartiles based on per-pupil funding gap. Q4 districts — those with the largest gaps — serve 56% of all students and account for 89% of the statewide shortfall.</p>
 
     <div class="quartile-grid" id="quartile-grid" role="list"></div>
   </div>
@@ -721,7 +745,7 @@
 <section id="li-section" class="section section-alt" aria-labelledby="li-title">
   <div class="container">
     <h2 class="section-title" id="li-title">Long Island: Extreme Inequity in Plain Sight</h2>
-    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $6.9 billion — $2.7 billion in Nassau and $4.2 billion in Suffolk. Both counties currently receive far less than the updated formula would entitle them to, at 186% and 193% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of upwards of $40,000.</p>
+    <p class="section-sub">Together the two counties enroll 418,302 students and face a combined funding gap of nearly $4.2 billion — $1.5 billion in Nassau and $2.6 billion in Suffolk. Both counties currently receive less than the updated formula would entitle them to, at 107% and 120% of current Foundation Aid respectively. But at the district level, we see that the island is home to extreme inequities, with some districts facing a per-pupil funding gap of over $30,000.</p>
 
     <div class="li-intro" id="li-intro"></div>
 
@@ -827,6 +851,14 @@ function buildCountyData(records) {
       const vals = recs.map(r => r[field]).filter(v => v != null);
       return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
     };
+    // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator field
+    const cwrWeighted = () => {
+      let num = 0, den = 0;
+      for (const r of recs) {
+        if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; }
+      }
+      return den > 0 ? num / den : null;
+    };
     const totalGap = recs.reduce((s,r) => s + (r.gap_total||0), 0);
     const totalFA  = recs.reduce((s,r) => s + (r.current_fa||0), 0);
     const quartileCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 };
@@ -843,7 +875,7 @@ function buildCountyData(records) {
       pct_poc:  wAvg('pct_poc'),
       pct_ecdis: wAvg('pct_ecdis'),
       pct_prof:  wAvg('pct_prof'),
-      cwr:       avg('cwr'),
+      cwr:       cwrWeighted(),
       current_fa: totalFA,
       quartile_counts: quartileCounts,
     };
@@ -863,6 +895,14 @@ function buildStateAvg(records) {
     }
     return den > 0 ? num/den : null;
   };
+  // Enrollment-weighted statewide CWR using Weighted_Wealth_Ratio_Numerator
+  const cwrWeighted = () => {
+    let num = 0, den = 0;
+    for (const r of records) {
+      if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; }
+    }
+    return den > 0 ? num / den : null;
+  };
   return {
     district: 'State Average',
     enrollment: totalEnroll,
@@ -873,7 +913,7 @@ function buildStateAvg(records) {
     pct_poc:  wAvg('pct_poc'),
     pct_ecdis: wAvg('pct_ecdis'),
     pct_prof:  wAvg('pct_prof'),
-    cwr:       wAvg('cwr'),
+    cwr:       cwrWeighted(),
   };
 }
 
@@ -893,9 +933,11 @@ function buildQuartileData(records) {
       for (const r of recs) { if (r[field]!=null && r.enrollment) { num+=r[field]*r.enrollment; den+=r.enrollment; } }
       return den>0?num/den:null;
     };
-    const sAvg = (field) => {
-      const vals = recs.map(r=>r[field]).filter(v=>v!=null);
-      return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator
+    const cwrWeighted = () => {
+      let num=0, den=0;
+      for (const r of recs) { if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; } }
+      return den > 0 ? num / den : null;
     };
     const totalGap = recs.reduce((s,r)=>s+(r.gap_total||0),0);
     const totalFA  = recs.reduce((s,r)=>s+(r.current_fa||0),0);
@@ -910,7 +952,7 @@ function buildQuartileData(records) {
       pct_poc:   wAvg('pct_poc'),
       pct_ecdis: wAvg('pct_ecdis'),
       pct_prof:  wAvg('pct_prof'),
-      cwr:       sAvg('cwr'),
+      cwr:       cwrWeighted(),
     };
   }
   return out;
@@ -1581,7 +1623,10 @@ function renderLICallout() {
 
   // Aggregate need indicators for the most underfunded quartile (top 25%)
   const topQuarter = sorted.slice(0, Math.ceil(sorted.length / 4));
-  const avgCWR  = topQuarter.reduce((s,r)=>s+(r.cwr||0),0) / topQuarter.filter(r=>r.cwr!=null).length;
+  // Enrollment-weighted CWR using Weighted_Wealth_Ratio_Numerator
+  const _cwrNum = topQuarter.reduce((s,r) => s + ((r.wwr_num != null && r.enrollment) ? r.wwr_num : 0), 0);
+  const _cwrDen = topQuarter.reduce((s,r) => s + ((r.wwr_num != null && r.enrollment) ? r.enrollment : 0), 0);
+  const avgCWR  = _cwrDen > 0 ? _cwrNum / _cwrDen : null;
   const avgELA  = topQuarter.filter(r=>r.pct_prof!=null);
   const avgELApct = avgELA.length ? avgELA.reduce((s,r)=>s+r.pct_prof,0)/avgELA.length : null;
   const avgPOC  = topQuarter.filter(r=>r.pct_poc!=null);
@@ -1619,6 +1664,14 @@ function drawLIQ4Chart() {
     const sumW = valid.reduce((s, r) => s + r.enrollment, 0);
     return valid.reduce((s, r) => s + r[field] * r.enrollment, 0) / sumW;
   };
+  // CWR pool using Weighted_Wealth_Ratio_Numerator field
+  const cwrPool = recs => {
+    let num = 0, den = 0;
+    for (const r of recs) {
+      if (r.wwr_num != null && r.enrollment) { num += r.wwr_num; den += r.enrollment; }
+    }
+    return den > 0 ? num / den : null;
+  };
   const gapPool = recs => {
     const tot = recs.reduce((s, r) => s + (r.gap_total || 0), 0);
     const enr = recs.reduce((s, r) => s + (r.enrollment || 0), 0);
@@ -1629,14 +1682,14 @@ function drawLIQ4Chart() {
     pct_poc:   wPool(liAll, 'pct_poc'),
     pct_ecdis: wPool(liAll, 'pct_ecdis'),
     pct_prof:  wPool(liAll, 'pct_prof'),
-    cwr:       wPool(liAll, 'cwr'),
+    cwr:       cwrPool(liAll),
     gap_pp:    gapPool(liAll),
   };
   const q4Avg = {
     pct_poc:   wPool(liQ4, 'pct_poc'),
     pct_ecdis: wPool(liQ4, 'pct_ecdis'),
     pct_prof:  wPool(liQ4, 'pct_prof'),
-    cwr:       wPool(liQ4, 'cwr'),
+    cwr:       cwrPool(liQ4),
     gap_pp:    gapPool(liQ4),
   };
 
